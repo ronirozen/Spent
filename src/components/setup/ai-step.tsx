@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import {
   type PullEvent,
 } from "@/lib/api";
 
-type AIChoice = "claude" | "ollama" | "none";
+type AIChoice = "claude" | "gemini" | "ollama" | "none";
 
 interface AIStepProps {
   onComplete: () => void;
@@ -34,6 +35,7 @@ interface PullState {
 
 const TINTS = {
   claude: { bg: "#fad6c0", mid: "#e89968", ink: "#7a4222" },
+  gemini: { bg: "#cce5ff", mid: "#80bfff", ink: "#004080" },
   ollama: { bg: "#dbedd1", mid: "#a8d18d", ink: "#3e5a2e" },
   none: { bg: "#e6dfd1", mid: "#a89978", ink: "#5b5240" },
 } as const;
@@ -46,29 +48,28 @@ interface ProviderMeta {
   recommended?: boolean;
 }
 
-const PROVIDERS: ProviderMeta[] = [
+const PROVIDERS: Omit<ProviderMeta, 'title' | 'tagline'>[] = [
   {
     id: "claude",
-    title: "Claude",
-    tagline: "Anthropic API, fast and accurate",
     icon: "✦",
     recommended: true,
   },
   {
+    id: "gemini",
+    icon: "✧",
+  },
+  {
     id: "ollama",
-    title: "Ollama",
-    tagline: "Runs locally, free and private",
     icon: "◐",
   },
   {
     id: "none",
-    title: "Manual",
-    tagline: "No AI, categorize transactions yourself",
     icon: "↷",
   },
 ];
 
 export function AIStep({ onComplete, onBack }: AIStepProps) {
+  const t = useTranslations("setup");
   const [choice, setChoice] = useState<AIChoice>("claude");
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
@@ -107,6 +108,7 @@ export function AIStep({ onComplete, onBack }: AIStepProps) {
   const canContinue =
     choice === "none" ||
     (choice === "claude" && /^sk-ant-/.test(apiKey) && apiKey.length > 25) ||
+    (choice === "gemini" && apiKey.length > 10) ||
     (choice === "ollama" && modelInstalled);
 
   const handlePull = () => {
@@ -149,7 +151,7 @@ export function AIStep({ onComplete, onBack }: AIStepProps) {
     try {
       await saveAIConfig({
         provider: choice,
-        apiKey: choice === "claude" ? apiKey : undefined,
+        apiKey: (choice === "claude" || choice === "gemini") ? apiKey : undefined,
         ollamaUrl: choice === "ollama" ? ollamaUrl : undefined,
         ollamaModel: choice === "ollama" ? ollamaModel : undefined,
       });
@@ -163,14 +165,13 @@ export function AIStep({ onComplete, onBack }: AIStepProps) {
     <div className="mx-auto w-full max-w-[520px] space-y-6">
       <header className="space-y-2">
         <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Step 2 of 5
+          {t("aiStepLabel")}
         </div>
         <h1 className="font-serif text-4xl leading-[1.08] tracking-tight">
-          How should we categorize?
+          {t("aiTitle")}
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Spent uses AI to group your transactions into categories. You can
-          change this any time in settings.
+          {t("aiDescription")}
         </p>
       </header>
 
@@ -195,6 +196,14 @@ export function AIStep({ onComplete, onBack }: AIStepProps) {
                   <div className="pt-1.5">
                     {p.id === "claude" && (
                       <ClaudeConfig
+                        apiKey={apiKey}
+                        setApiKey={setApiKey}
+                        showKey={showKey}
+                        setShowKey={setShowKey}
+                      />
+                    )}
+                    {p.id === "gemini" && (
+                      <GeminiConfig
                         apiKey={apiKey}
                         setApiKey={setApiKey}
                         showKey={showKey}
@@ -229,10 +238,10 @@ export function AIStep({ onComplete, onBack }: AIStepProps) {
 
       <footer className="flex items-center justify-between pt-2">
         <Button variant="outline" onClick={onBack}>
-          ← Back
+          {t("aiBackButton")}
         </Button>
         <Button onClick={handleSave} disabled={!canContinue || saving}>
-          {saving ? "Saving..." : "Continue →"}
+          {saving ? t("aiSavingButton") : t("aiContinueButton")}
         </Button>
       </footer>
     </div>
@@ -244,7 +253,7 @@ function ProviderRow({
   selected,
   onClick,
 }: {
-  provider: ProviderMeta;
+  provider: Omit<ProviderMeta, 'title' | 'tagline'>;
   selected: boolean;
   onClick: () => void;
 }) {
@@ -271,19 +280,19 @@ function ProviderRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-bold tracking-tight">
-            {provider.title}
+            {useTranslations("setup")(`aiProvider${provider.id === "none" ? "Manual" : provider.id.charAt(0).toUpperCase() + provider.id.slice(1)}Title`)}
           </span>
           {provider.recommended && (
             <span
               className="rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.06em] text-white"
               style={{ background: tint.mid }}
             >
-              Recommended
+              {useTranslations("setup")("aiRecommendedBadge")}
             </span>
           )}
         </div>
-        <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-          {provider.tagline}
+        <div className="text-[11px] text-muted-foreground">
+          {useTranslations("setup")(`aiProvider${provider.id === "none" ? "Manual" : provider.id.charAt(0).toUpperCase() + provider.id.slice(1)}Tagline`)}
         </div>
       </div>
       {selected ? (
@@ -350,6 +359,57 @@ function ClaudeConfig({
   );
 }
 
+function GeminiConfig({
+  apiKey,
+  setApiKey,
+  showKey,
+  setShowKey,
+}: {
+  apiKey: string;
+  setApiKey: (v: string) => void;
+  showKey: boolean;
+  setShowKey: (v: boolean) => void;
+}) {
+  const t = useTranslations("setup");
+  return (
+    <div className="space-y-2 rounded-xl border border-border bg-card/60 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor="gemini-api-key" className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+          {t("aiClaudeKeyLabel")}
+        </Label>
+        <a
+          href="https://aistudio.google.com/app/apikey"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[11px] font-medium text-primary hover:underline"
+        >
+          {t("aiClaudeGetKey")}
+        </a>
+      </div>
+      <div className="relative">
+        <Input
+          id="gemini-api-key"
+          type={showKey ? "text" : "password"}
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="AIzaSy..."
+          className="font-mono pe-14"
+        />
+        <button
+          type="button"
+          onClick={() => setShowKey(!showKey)}
+          className="absolute end-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent"
+        >
+          {showKey ? t("aiClaudeHide") : t("aiClaudeShow")}
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        {t("aiClaudeEncryptedNote")}
+      </p>
+    </div>
+  );
+}
+
 function OllamaConfig({
   url,
   setUrl,
@@ -373,6 +433,7 @@ function OllamaConfig({
   onPull: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("setup");
   return (
     <div className="space-y-3 rounded-xl border border-border bg-card/60 p-4">
       <div
@@ -393,24 +454,24 @@ function OllamaConfig({
         />
         {reachable === false ? (
           <>
-            Ollama not detected
+            {t("aiOllamaNotDetected")}
             <a
               href="https://ollama.com"
               target="_blank"
               rel="noreferrer"
               className="ms-auto font-bold underline"
             >
-              Install ↗
+              {t("aiOllamaInstall")}
             </a>
           </>
         ) : (
-          <>Ollama running on {url}</>
+          <>{t("aiOllamaRunningOn", { url })}</>
         )}
       </div>
 
       <div className="space-y-1">
         <Label htmlFor="ollama-url" className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
-          Server URL
+          {t("aiOllamaServerUrl")}
         </Label>
         <Input
           id="ollama-url"
@@ -422,7 +483,7 @@ function OllamaConfig({
 
       <div className="space-y-1.5">
         <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
-          Pick a model
+          {t("aiOllamaPickModel")}
         </Label>
         <div className="grid grid-cols-3 gap-1.5">
           {RECOMMENDED_OLLAMA_MODELS.slice(0, 3).map((m) => (
@@ -471,12 +532,14 @@ function OllamaConfig({
 }
 
 function ManualNote() {
+  const t = useTranslations("setup");
   return (
     <div className="rounded-xl border border-border bg-card/60 p-4 text-[12px] leading-relaxed text-muted-foreground">
-      Spent will leave transactions <span className="text-foreground">uncategorized</span>;
-      you can assign categories from the transactions table any time. Switch to
-      Claude or Ollama later in{" "}
-      <span className="font-bold text-foreground">Settings → AI</span>.
+      {t("aiManualNoteBefore")}{" "}
+      <span className="text-foreground">{t("aiManualNoteUncategorized")}</span>
+      {t("aiManualNoteAfter")}{" "}
+      <span className="font-bold text-foreground">{t("aiManualNoteSettingsLink")}</span>
+      {t("aiManualNoteEnd")}
     </div>
   );
 }
@@ -498,6 +561,7 @@ function OllamaPullCTA({
   onPull: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("setup");
   const info: OllamaModelInfo | undefined = RECOMMENDED_OLLAMA_MODELS.find(
     (m) => m.name === model
   );
@@ -505,7 +569,8 @@ function OllamaPullCTA({
   if (installed) {
     return (
       <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-[12px] font-medium text-primary">
-        ✓ <span className="font-bold">{model}</span> is installed and ready.
+        <Check className="h-4 w-4" />
+        {t("aiOllamaInstalledReady", { model })}
       </div>
     );
   }
@@ -520,7 +585,7 @@ function OllamaPullCTA({
         <div className="flex items-center justify-between text-[12px]">
           <span className="font-medium">
             {pullState.status === "starting"
-              ? "Starting download..."
+              ? t("aiOllamaStartingDownload")
               : pullState.status}
           </span>
           <button
@@ -528,7 +593,7 @@ function OllamaPullCTA({
             onClick={onCancel}
             className="text-[11px] text-muted-foreground hover:text-foreground"
           >
-            Cancel
+            {t("aiOllamaCancel")}
           </button>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -563,7 +628,7 @@ function OllamaPullCTA({
         disabled={reachable === false}
         className="w-full"
       >
-        ↓ Download {model} {info ? `(${info.sizeGb} GB)` : ""}
+        {t("aiOllamaDownloadButton", { model, size: info ? `(${info.sizeGb} GB)` : "" })}
       </Button>
       {pullError && (
         <p className="text-[11px] text-destructive">{pullError}</p>

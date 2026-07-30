@@ -39,6 +39,7 @@ import {
   updateCategoryBudgetMode,
   updateCategoryDescription,
 } from "@/lib/api";
+import { translateCategoryName } from "@/lib/i18n-data";
 import type { Category, CategoryWithData } from "@/lib/types";
 
 const NONE_VALUE = "__none__";
@@ -101,18 +102,20 @@ function Body({
   allCategories: Category[];
   onClose: () => void;
 }) {
+  const t = useTranslations("categoryDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   const sameKind = allCategories.filter(
     (c) => c.kind === category.kind && c.id !== category.id
   );
   const eligibleParents = sameKind
     .filter((c) => c.parentId == null)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => translateCategoryName(a.name, tCat).localeCompare(translateCategoryName(b.name, tCat)));
   const childCategories = useMemo(
     () =>
       allCategories
         .filter((c) => c.parentId === category.id)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allCategories, category.id]
+        .sort((a, b) => translateCategoryName(a.name, tCat).localeCompare(translateCategoryName(b.name, tCat))),
+    [allCategories, category.id, tCat]
   );
   const isParentGroup = childCategories.length > 0 || data?.isParent === true;
 
@@ -134,10 +137,10 @@ function Body({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <SheetTitle>{category.name}</SheetTitle>
+            <SheetTitle>{translateCategoryName(category.name, tCat)}</SheetTitle>
             <SheetDescription className="mt-0.5">
-              {category.kind === "expense" ? "Expense" : "Income"} category
-              {data?.parentName ? ` · in ${data.parentName}` : ""}
+              {category.kind === "expense" ? t("expense") : t("income")} {t("category")}
+              {data?.parentName ? ` · ${t("inParent", { parentName: translateCategoryName(data.parentName, tCat) })}` : ""}
             </SheetDescription>
           </div>
         </div>
@@ -199,6 +202,7 @@ function DeleteCategorySection({
 }) {
   const t = useTranslations("settings.categories");
   const tCommon = useTranslations("common");
+  const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -215,10 +219,11 @@ function DeleteCategorySection({
       onDeleted();
     },
     onError: (err: Error) => {
-      const names =
-        parseDeleteCategoryError(err.message) ??
-        (childCategories.length > 0
-          ? childCategories.map((c) => c.name)
+      const errorNames = parseDeleteCategoryError(err.message);
+      const names = errorNames 
+        ? errorNames.map(n => translateCategoryName(n, tCat))
+        : (childCategories.length > 0
+          ? childCategories.map((c) => translateCategoryName(c.name, tCat))
           : null);
       if (names && names.length > 0) {
         toast.error(t("deleteHasChildrenNamed", { names: names.join(", ") }));
@@ -246,7 +251,7 @@ function DeleteCategorySection({
             {isParentGroup && childCategories.length > 0 ? (
               <ul className="mt-2 list-disc space-y-0.5 ps-4 text-xs text-foreground/80">
                 {childCategories.map((child) => (
-                  <li key={child.id}>{child.name}</li>
+                  <li key={child.id}>{translateCategoryName(child.name, tCat)}</li>
                 ))}
               </ul>
             ) : null}
@@ -268,7 +273,7 @@ function DeleteCategorySection({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t("confirmDeleteTitle", { name: category.name })}
+              {t("confirmDeleteTitle", { name: translateCategoryName(category.name, tCat) })}
             </DialogTitle>
             <DialogDescription>
               {t("confirmDeleteDescription", { count: transactionCount })}
@@ -299,6 +304,7 @@ function BudgetSection({
   category: Category;
   data: CategoryWithData | null;
 }) {
+  const t = useTranslations("categoryDetailSheet");
   const queryClient = useQueryClient();
   const isBudgeted = category.budgetMode === "budgeted";
 
@@ -337,7 +343,7 @@ function BudgetSection({
   return (
     <section>
       <div className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-        Budget
+        {t("budget")}
       </div>
       <div className="mt-3 rounded-xl border border-border bg-card p-4">
         <div className="flex items-start justify-between gap-4">
@@ -346,12 +352,12 @@ function BudgetSection({
               htmlFor={`mode-${category.id}`}
               className="text-sm font-medium"
             >
-              {isBudgeted ? "Budgeted" : "Tracking only"}
+              {isBudgeted ? t("budgeted") : t("trackingOnly")}
             </Label>
             <p className="text-xs text-muted-foreground">
               {isBudgeted
-                ? "Show progress vs a monthly target."
-                : "Show spending without a target."}
+                ? t("budgetedHint")
+                : t("trackingHint")}
             </p>
           </div>
           <Switch
@@ -365,7 +371,7 @@ function BudgetSection({
 
         {isBudgeted ? (
           <div className="mt-4 space-y-1.5">
-            <Label htmlFor={`budget-${category.id}`}>Monthly budget</Label>
+            <Label htmlFor={`budget-${category.id}`}>{t("monthlyBudget")}</Label>
             <InputGroup prefix="₪">
               <Input
                 id={`budget-${category.id}`}
@@ -379,15 +385,11 @@ function BudgetSection({
             </InputGroup>
             {data ? (
               <p className="text-[11px] text-muted-foreground">
-                Spent ₪{Math.round(data.spent).toLocaleString("en-IL")} this
-                month
+                {t("spentThisMonth", { spent: Math.round(data.spent).toLocaleString("en-IL") })}
                 {data.vsTypical && data.vsTypical.typical > 0 ? (
                   <>
                     {" "}
-                    · typical ≈ ₪
-                    {Math.round(data.vsTypical.typical).toLocaleString(
-                      "en-IL"
-                    )}
+                    · {t("typical", { typical: Math.round(data.vsTypical.typical).toLocaleString("en-IL") })}
                   </>
                 ) : null}
               </p>
@@ -406,6 +408,8 @@ function GroupSection({
   category: Category;
   eligibleParents: Category[];
 }) {
+  const t = useTranslations("categoryDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: (parentId: number | null) =>
@@ -413,20 +417,18 @@ function GroupSection({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["summary"] });
-      toast.success("Group updated");
+      toast.success(t("groupUpdated"));
     },
     onError: (err: Error) => {
       const reason = err.message;
       if (reason === "kind-mismatch") {
-        toast.error("Parent must be the same kind (expense or income).");
+        toast.error(t("errorKindMismatch"));
       } else if (reason === "not-leaf-target") {
-        toast.error("Parent must be a top-level category.");
+        toast.error(t("errorNotLeafTarget"));
       } else if (reason === "child-has-children") {
-        toast.error(
-          "Can't move a category that already has sub-categories under it."
-        );
+        toast.error(t("errorChildHasChildren"));
       } else {
-        toast.error("Couldn't update parent.");
+        toast.error(t("errorUpdateParent"));
       }
     },
   });
@@ -436,10 +438,10 @@ function GroupSection({
   return (
     <section>
       <div className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-        Group
+        {t("group")}
       </div>
       <div className="mt-3 rounded-xl border border-border bg-card p-4 space-y-2">
-        <Label>Parent group</Label>
+        <Label>{t("parentGroup")}</Label>
         <Select
           value={current}
           onValueChange={(v) => {
@@ -452,23 +454,24 @@ function GroupSection({
             <SelectValue>
               {(value: string) =>
                 value === NONE_VALUE
-                  ? "(no parent)"
-                  : eligibleParents.find((p) => String(p.id) === value)?.name ??
-                    "(no parent)"
+                  ? t("noParent")
+                  : eligibleParents.find((p) => String(p.id) === value)?.name 
+                      ? translateCategoryName(eligibleParents.find((p) => String(p.id) === value)!.name, tCat) 
+                      : t("noParent")
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NONE_VALUE}>(no parent)</SelectItem>
+            <SelectItem value={NONE_VALUE}>{t("noParent")}</SelectItem>
             {eligibleParents.map((p) => (
               <SelectItem key={p.id} value={String(p.id)}>
-                {p.name}
+                {translateCategoryName(p.name, tCat)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <p className="text-[11px] text-muted-foreground">
-          Use a parent group to roll spending up. Most users keep the defaults.
+          {t("groupHint")}
         </p>
       </div>
     </section>
@@ -476,6 +479,8 @@ function GroupSection({
 }
 
 function DescriptionSection({ category }: { category: Category }) {
+  const t = useTranslations("categoryDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
   const [value, setValue] = useState(category.description ?? "");
   useEffect(() => {
@@ -487,10 +492,10 @@ function DescriptionSection({ category }: { category: Category }) {
       updateCategoryDescription(category.id, next),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Description saved");
+      toast.success(t("descriptionSaved"));
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Couldn't save description");
+      toast.error(err.message || t("errorSaveDescription"));
     },
   });
 
@@ -499,9 +504,7 @@ function DescriptionSection({ category }: { category: Category }) {
     const current = (category.description ?? "").trim();
     if (trimmed === current) return;
     if (trimmed.length > DESCRIPTION_MAX) {
-      toast.error(
-        `Description must be ${DESCRIPTION_MAX} characters or fewer.`
-      );
+      toast.error(t("descriptionMaxLength", { max: DESCRIPTION_MAX }));
       return;
     }
     mutation.mutate(trimmed.length === 0 ? null : trimmed);
@@ -510,10 +513,10 @@ function DescriptionSection({ category }: { category: Category }) {
   return (
     <section>
       <div className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-        AI hint
+        {t("aiHint")}
       </div>
       <div className="mt-3 rounded-xl border border-border bg-card p-4 space-y-2">
-        <Label htmlFor={`desc-${category.id}`}>Description</Label>
+        <Label htmlFor={`desc-${category.id}`}>{t("description")}</Label>
         <textarea
           id={`desc-${category.id}`}
           value={value}
@@ -521,12 +524,12 @@ function DescriptionSection({ category }: { category: Category }) {
           onBlur={handleBlur}
           rows={4}
           maxLength={DESCRIPTION_MAX}
-          placeholder={`Describe what belongs in "${category.name}" — and what does NOT.`}
+          placeholder={t("descriptionPlaceholder", { name: translateCategoryName(category.name, tCat) })}
           className="block w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           disabled={mutation.isPending}
         />
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>Sent to the AI on every categorize.</span>
+          <span>{t("aiHintFooter")}</span>
           <span className="tabular-nums">
             {value.length} / {DESCRIPTION_MAX}
           </span>

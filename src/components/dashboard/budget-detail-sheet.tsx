@@ -10,6 +10,8 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
+import { useTranslations } from "next-intl";
+import { translateCategoryName } from "@/lib/i18n-data";
 import {
   Sheet,
   SheetContent,
@@ -140,6 +142,8 @@ function DetailSkeleton() {
 }
 
 function DetailContent({ data }: { data: CategoryDetail }) {
+  const t = useTranslations("budgetDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
   const sameKindCategoriesQuery = useQuery({
     queryKey: ["categories", data.category.kind],
@@ -205,16 +209,16 @@ function DetailContent({ data }: { data: CategoryDetail }) {
           <div className="min-w-0 flex-1">
             <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
               {data.category.kind === "income"
-                ? "Income category"
-                : "Expense category"}
+                ? t("incomeCategory")
+                : t("expenseCategory")}
             </div>
             <SheetTitle className="truncate font-serif text-2xl font-normal">
-              {data.category.name}
+              {translateCategoryName(data.category.name, tCat)}
             </SheetTitle>
           </div>
           {data.category.kind !== "income" && (
             <label className="flex shrink-0 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-              <span>Budget</span>
+              <span>{t("budget")}</span>
               <Switch
                 size="sm"
                 checked={!isTracking}
@@ -226,9 +230,9 @@ function DetailContent({ data }: { data: CategoryDetail }) {
 
         {isTracking ? (
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <Stat label="Spent" value={formatCurrency(data.spent)} />
+            <Stat label={t("spent")} value={formatCurrency(data.spent)} />
             <Stat
-              label="Typical / month"
+              label={t("typicalPerMonth")}
               value={
                 data.vsTypical && data.vsTypical.typical > 0
                   ? formatCurrency(data.vsTypical.typical)
@@ -236,7 +240,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
               }
               sublabel={
                 data.vsTypical && data.vsTypical.typical > 0
-                  ? `${Math.round(data.vsTypical.percentDiff) >= 0 ? "+" : ""}${Math.round(data.vsTypical.percentDiff)}% this month`
+                  ? `${Math.round(data.vsTypical.percentDiff) >= 0 ? "+" : ""}${t("typicalThisMonth", { percent: Math.round(data.vsTypical.percentDiff) })}`
                   : undefined
               }
             />
@@ -244,14 +248,14 @@ function DetailContent({ data }: { data: CategoryDetail }) {
         ) : (
           <>
             <div className="mt-2 grid grid-cols-3 gap-3">
-              <Stat label="Spent" value={formatCurrency(data.spent)} />
+              <Stat label={t("spent")} value={formatCurrency(data.spent)} />
               <BudgetStat
                 amount={data.budget}
                 isAuto={data.isAutoBudget}
                 onSave={handleSaveBudget}
               />
               <Stat
-                label="Left"
+                label={t("left")}
                 value={formatCurrency(Math.max(0, data.budget - data.spent))}
               />
             </div>
@@ -291,7 +295,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
 
         <div className="grid grid-cols-2 gap-3">
           <Card>
-            <CardLabel>VS. LAST MONTH</CardLabel>
+            <CardLabel>{t("vsLastMonth")}</CardLabel>
             <div className="mt-1 font-serif text-2xl tabular-nums">
               {data.prevSpent > 0
                 ? `${data.spent - data.prevSpent >= 0 ? "+" : "-"}${formatCurrency(Math.abs(data.spent - data.prevSpent))}`
@@ -305,30 +309,31 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                     <>
                       {" · "}
                       {Math.abs(Math.round(data.vsLastMonth))}%{" "}
-                      {data.vsLastMonth < 0 ? "lower" : "higher"}
+                      {data.vsLastMonth < 0 ? t("lower") : t("higher")}
                     </>
                   )}
                 </>
               ) : (
-                "No spending last period"
+                t("noSpendingLastPeriod")
               )}
             </div>
           </Card>
 
           <Card>
-            <CardLabel>AVG / TRANSACTION</CardLabel>
+            <CardLabel>{t("avgPerTransaction")}</CardLabel>
             <div className="mt-1 font-serif text-2xl tabular-nums">
               {formatCurrency(data.avgPerTransaction)}
             </div>
             <div className="mt-0.5 text-xs text-muted-foreground">
-              {data.transactionCount} transaction
-              {data.transactionCount === 1 ? "" : "s"} this period
+              {data.transactionCount === 1 
+                ? t("transactionCountOne", { count: data.transactionCount }) 
+                : t("transactionCountOther", { count: data.transactionCount })}
             </div>
           </Card>
         </div>
 
         <Card>
-          <CardLabel>DAILY SPEND THIS PERIOD</CardLabel>
+          <CardLabel>{t("dailySpendThisPeriod")}</CardLabel>
           <div className="mt-2 h-32">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -384,36 +389,36 @@ function DetailContent({ data }: { data: CategoryDetail }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium">
-              Transactions · {data.transactionCount}
+              {t("transactions")} · {data.transactionCount}
             </h3>
             <Button
               size="sm"
               variant="ghost"
               className="h-7 gap-1 text-xs"
               disabled
-              title="Manual transaction entry not available yet"
+              title={t("manualEntryNotAvailable")}
             >
-              <Plus className="h-3.5 w-3.5" /> Add
+              <Plus className="h-3.5 w-3.5" /> {t("add")}
             </Button>
           </div>
           <div className="overflow-hidden rounded-2xl border bg-card">
             {data.transactions.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
-                No transactions in this category for this period.
+                {t("noTransactions")}
               </div>
             ) : (
               <ul className="divide-y">
-                {data.transactions.map((t) => (
+                {data.transactions.map((txn) => (
                   <li
-                    key={t.id}
+                    key={txn.id}
                     className="flex items-center justify-between gap-3 px-4 py-2.5"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="break-words text-sm font-medium">
-                        {t.description}
+                        {txn.description}
                       </div>
                       <div className="text-xs text-muted-foreground tabular-nums">
-                        {formatDate(t.date)}
+                        {formatDate(txn.date)}
                       </div>
                     </div>
                     <DropdownMenu>
@@ -421,9 +426,9 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                         <Badge
                           variant="outline"
                           className="border-none p-0"
-                          style={{ color: t.categoryColor ?? undefined }}
+                          style={{ color: txn.categoryColor ?? undefined }}
                         >
-                          {t.categoryName ?? "Uncategorized"}
+                          {txn.categoryName ? translateCategoryName(txn.categoryName, tCat) : t("uncategorized")}
                         </Badge>
                         <ChevronDown className="h-3 w-3 text-muted-foreground" />
                       </DropdownMenuTrigger>
@@ -431,19 +436,19 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                         {(sameKindCategoriesQuery.data ?? []).map((cat) => (
                           <DropdownMenuItem
                             key={cat.id}
-                            onClick={() => handleChangeCategory(t.id, cat.id)}
+                            onClick={() => handleChangeCategory(txn.id, cat.id)}
                           >
                             <div
                               className="me-2 h-2 w-2 rounded-full"
                               style={{ backgroundColor: cat.color }}
                             />
-                            {cat.name}
+                            {translateCategoryName(cat.name, tCat)}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <div className="shrink-0 text-sm font-medium tabular-nums">
-                      {formatCurrency(t.chargedAmount)}
+                      {formatCurrency(txn.chargedAmount)}
                     </div>
                   </li>
                 ))}
@@ -465,10 +470,12 @@ function ChildrenBreakdownSection({
   budgetSource: "own" | "rollup" | "leaf";
   color: string;
 }) {
+  const t = useTranslations("budgetDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   const banner =
     budgetSource === "own"
-      ? "Budget set on this parent. Children's budgets are tracked individually but don't roll up here."
-      : "Budget rolled up from sub-categories. Set a budget on this parent to override.";
+      ? t("budgetSetOnThisParent")
+      : t("budgetRolledUp");
   return (
     <div
       className="space-y-3 rounded-2xl p-4"
@@ -476,10 +483,10 @@ function ChildrenBreakdownSection({
     >
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-sm font-medium">
-          Sub-categories · {children.length}
+          {t("subCategories")} · {children.length}
         </h3>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          {budgetSource === "own" ? "Own budget" : "Rolled up"}
+          {budgetSource === "own" ? t("ownBudget") : t("rolledUp")}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">{banner}</p>
@@ -496,17 +503,17 @@ function ChildrenBreakdownSection({
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: c.color }}
                 />
-                <span className="truncate text-sm font-medium">{c.name}</span>
+                <span className="truncate text-sm font-medium">{translateCategoryName(c.name, tCat)}</span>
               </div>
               <div className="flex shrink-0 items-center gap-3 text-xs tabular-nums">
                 <div className="text-end">
                   <div className="font-medium">{formatCurrency(c.spent)}</div>
                   <div className="text-[10px] text-muted-foreground">
                     {c.budget > 0
-                      ? `of ${formatCurrency(c.budget)}`
+                      ? t("ofAmount", { amount: formatCurrency(c.budget) })
                       : c.budgetMode === "tracking"
-                        ? "tracking"
-                        : "no budget"}
+                        ? t("tracking")
+                        : t("noBudget")}
                   </div>
                 </div>
                 {c.budget > 0 && (
@@ -542,6 +549,8 @@ function NeedsReviewSection({
   onChange: (id: number, categoryId: number) => void;
   color: string;
 }) {
+  const t = useTranslations("budgetDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
   return (
     <div
       className="space-y-2 rounded-2xl p-4"
@@ -553,25 +562,24 @@ function NeedsReviewSection({
           style={{ color: "var(--status-heads-up)" }}
         />
         <h3 className="text-sm font-medium">
-          Needs review · {transactions.length}
+          {t("needsReview")} · {transactions.length}
         </h3>
       </div>
       <p className="text-xs text-muted-foreground">
-        The AI wasn&apos;t sure about these. Approve to keep, or pick a different
-        category. Either way, the choice is remembered for next time.
+        {t("aiNotSure")}
       </p>
       <ul className="mt-2 space-y-2">
-        {transactions.map((t) => (
+        {transactions.map((txn) => (
           <li
-            key={t.id}
+            key={txn.id}
             className="flex items-center justify-between gap-3 rounded-xl bg-background/70 p-3"
           >
             <div className="min-w-0 flex-1">
               <div className="break-words text-sm font-medium">
-                {t.description}
+                {txn.description}
               </div>
               <div className="text-xs text-muted-foreground tabular-nums">
-                {formatDate(t.date)} · {formatCurrency(t.chargedAmount)}
+                {formatDate(txn.date)} · {formatCurrency(txn.chargedAmount)}
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
@@ -583,10 +591,10 @@ function NeedsReviewSection({
                     variant="outline"
                     className="border-none p-0"
                     style={{
-                      color: t.categoryColor ?? undefined,
+                      color: txn.categoryColor ?? undefined,
                     }}
                   >
-                    {t.categoryName ?? "Uncategorized"}
+                    {txn.categoryName ? translateCategoryName(txn.categoryName, tCat) : t("uncategorized")}
                   </Badge>
                   <ChevronDown className="h-3 w-3 text-muted-foreground" />
                 </DropdownMenuTrigger>
@@ -594,13 +602,13 @@ function NeedsReviewSection({
                   {categories.map((cat) => (
                     <DropdownMenuItem
                       key={cat.id}
-                      onClick={() => onChange(t.id, cat.id)}
+                      onClick={() => onChange(txn.id, cat.id)}
                     >
                       <div
                         className="me-2 h-2 w-2 rounded-full"
                         style={{ backgroundColor: cat.color }}
                       />
-                      {cat.name}
+                      {translateCategoryName(cat.name, tCat)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -608,10 +616,10 @@ function NeedsReviewSection({
               <Button
                 size="sm"
                 className="h-7 gap-1 px-2 text-xs"
-                onClick={() => onApprove(t.id)}
+                onClick={() => onApprove(txn.id)}
               >
                 <Check className="h-3.5 w-3.5" />
-                Approve
+                {t("approve")}
               </Button>
             </div>
           </li>
@@ -654,6 +662,7 @@ function BudgetStat({
   isAuto: boolean;
   onSave: (amount: number | null) => Promise<void> | void;
 }) {
+  const t = useTranslations("budgetDetailSheet");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -702,7 +711,7 @@ function BudgetStat({
   return (
     <div>
       <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-        Budget
+        {t("budget")}
       </div>
       {editing ? (
         <input
@@ -725,7 +734,7 @@ function BudgetStat({
             }
           }}
           className="mt-0.5 w-full rounded-md border border-border bg-background/70 px-1.5 py-0.5 font-serif text-xl tabular-nums outline-none focus:border-foreground/40 disabled:opacity-60"
-          placeholder="auto"
+          placeholder={t("auto")}
         />
       ) : (
         <button
@@ -742,7 +751,7 @@ function BudgetStat({
       )}
       {!editing && isAuto && amount > 0 && (
         <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          auto
+          {t("auto")}
         </div>
       )}
     </div>

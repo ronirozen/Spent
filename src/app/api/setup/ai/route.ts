@@ -4,7 +4,7 @@ import { encrypt } from "@/server/lib/encryption";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as {
-    provider: "claude" | "ollama" | "none";
+    provider: "claude" | "gemini" | "ollama" | "none";
     apiKey?: string;
     ollamaUrl?: string;
     ollamaModel?: string;
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
   setSetting("ai_provider", body.provider);
 
-  if (body.provider === "claude" && body.apiKey) {
+  if ((body.provider === "claude" || body.provider === "gemini") && body.apiKey) {
     const { encrypted, iv, authTag } = encrypt(body.apiKey);
     setSetting("ai_api_key_encrypted", encrypted.toString("hex"));
     setSetting("ai_api_key_iv", iv.toString("hex"));

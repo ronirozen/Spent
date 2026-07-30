@@ -181,7 +181,7 @@ export function SyncButton({ onComplete, autoStart = false }: SyncButtonProps) {
         className="gap-1.5"
       >
         <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-        {syncing ? t("syncing") : t("syncAndCategorize")}
+        <span className="hidden sm:inline">{syncing ? t("syncing") : t("syncAndCategorize")}</span>
       </Button>
 
       <SyncProgressDialog

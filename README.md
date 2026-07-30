@@ -212,7 +212,7 @@ You can change providers any time from **Settings → AI provider**. Existing ca
 > Prefer a screenshot-by-screenshot walkthrough? The [step-by-step install guides](https://shaya16.github.io/Spent/getting-started/) on the docs site cover macOS and Windows separately, with build-tool setup and tray-app gotchas spelled out.
 
 ```bash
-git clone https://github.com/Shaya16/Spent.git
+git clone https://github.com/ronirozen/Spent.git
 cd spent
 npm install
 npm run setup

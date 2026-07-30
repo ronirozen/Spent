@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  spent:
+    build: .
+    container_name: spent
+    restart: unless-stopped
+    ports:
+      - "41234:41234"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Jerusalem

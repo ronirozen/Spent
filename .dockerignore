@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+data
+menubar
+Spent.sln
+docs
+website
+README.md
+CLAUDE.md
+SECURITY.md
+AGENTS.md

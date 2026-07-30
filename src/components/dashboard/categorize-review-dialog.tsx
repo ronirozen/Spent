@@ -23,11 +23,16 @@ interface CategorizeReviewDialogProps {
   onApplied: () => void;
 }
 
+import { useTranslations } from "next-intl";
+
 export function CategorizeReviewDialog({
   preview,
   onClose,
   onApplied,
 }: CategorizeReviewDialogProps) {
+  const t = useTranslations("categorizeReview");
+  const tCommon = useTranslations("common");
+  
   const { data: existingCategories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: () => getCategories(),
@@ -52,16 +57,15 @@ export function CategorizeReviewDialog({
           .map(([name]) => name),
       }),
     onSuccess: (data) => {
-      toast.success(
-        `Applied to ${data.appliedCount} transaction${data.appliedCount === 1 ? "" : "s"}` +
-          (data.createdCategoriesCount > 0
-            ? ` · Added ${data.createdCategoriesCount} new categor${data.createdCategoriesCount === 1 ? "y" : "ies"}`
-            : "")
-      );
+      if (data.createdCategoriesCount > 0) {
+        toast.success(t("successToastAdded", { count: data.appliedCount, addedCount: data.createdCategoriesCount }));
+      } else {
+        toast.success(t("successToast", { count: data.appliedCount }));
+      }
       onApplied();
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Apply failed");
+      toast.error(err instanceof Error ? err.message : t("applyFailed"));
     },
   });
 
@@ -103,12 +107,10 @@ export function CategorizeReviewDialog({
       <DialogContent className="max-h-[85vh] max-w-2xl gap-0 overflow-hidden p-0">
         <DialogHeader className="px-6 pb-3 pt-6">
           <DialogTitle className="font-serif text-2xl tracking-tight">
-            AI categorization
+            {t("title")}
           </DialogTitle>
           <DialogDescription>
-            Suggested categories for {preview.uncategorizedCount} uncategorized{" "}
-            {preview.uncategorizedCount === 1 ? "transaction" : "transactions"}.
-            Approve or reject any new categories before applying.
+            {t("description", { count: preview.uncategorizedCount })}
           </DialogDescription>
         </DialogHeader>
 
@@ -117,7 +119,7 @@ export function CategorizeReviewDialog({
             {sortedExistingUsage.length > 0 && (
               <section>
                 <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                  Using existing categories ({stats.toExisting})
+                  {t("usingExisting", { count: stats.toExisting })}
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
                   {sortedExistingUsage.map((c) => (
@@ -141,7 +143,7 @@ export function CategorizeReviewDialog({
               <section>
                 <div className="mb-3 flex items-baseline justify-between">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                    Proposed new categories ({totalProposals})
+                    {t("proposedNew", { count: totalProposals })}
                   </h3>
                   <div className="flex gap-1.5">
                     <button
@@ -157,7 +159,7 @@ export function CategorizeReviewDialog({
                       }
                       className="text-xs text-muted-foreground hover:text-foreground"
                     >
-                      Approve all
+                      {t("approveAll")}
                     </button>
                     <span className="text-xs text-muted-foreground">·</span>
                     <button
@@ -173,7 +175,7 @@ export function CategorizeReviewDialog({
                       }
                       className="text-xs text-muted-foreground hover:text-foreground"
                     >
-                      Reject all
+                      {t("rejectAll")}
                     </button>
                   </div>
                 </div>
@@ -192,16 +194,13 @@ export function CategorizeReviewDialog({
               </section>
             ) : (
               <p className="text-sm text-muted-foreground">
-                The AI didn&apos;t propose any new categories. Everything fits in
-                your existing list.
+                {t("noneProposed")}
               </p>
             )}
 
             {preview.errors && preview.errors.length > 0 && (
               <div className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                {preview.errors.length} batch
-                {preview.errors.length === 1 ? "" : "es"} failed during AI
-                categorization. Other transactions were still processed.
+                {t("batchErrors", { count: preview.errors.length })}
               </div>
             )}
           </div>
@@ -211,36 +210,34 @@ export function CategorizeReviewDialog({
           <div className="me-auto flex flex-col gap-0.5 text-xs text-muted-foreground">
             <div>
               <span className="font-medium text-foreground">
-                {stats.toExisting + stats.toNew}
-              </span>{" "}
-              will be categorized
+                {t("willBeCategorized", { count: stats.toExisting + stats.toNew })}
+              </span>
               {stats.willStay > 0 && (
                 <>
                   {" "}
                   ·{" "}
-                  <span className="text-foreground">{stats.willStay}</span> will
-                  stay uncategorized
+                  <span className="text-foreground">
+                    {t("willStayUncategorized", { count: stats.willStay })}
+                  </span>
                 </>
               )}
             </div>
             {totalProposals > 0 && (
               <div>
                 <span className="font-medium text-foreground">
-                  {approvedCount}
-                </span>{" "}
-                of {totalProposals} new categor
-                {totalProposals === 1 ? "y" : "ies"} will be created
+                  {t("newCategoriesCreated", { approved: approvedCount, total: totalProposals })}
+                </span>
               </div>
             )}
           </div>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             onClick={() => applyMutation.mutate()}
             disabled={applyMutation.isPending}
           >
-            {applyMutation.isPending ? "Applying..." : "Apply"}
+            {applyMutation.isPending ? t("applying") : t("apply")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -257,6 +254,7 @@ function ProposalRow({
   approved: boolean;
   onToggle: (v: boolean) => void;
 }) {
+  const t = useTranslations("categorizeReview");
   return (
     <div
       className={`flex items-start justify-between gap-4 rounded-xl border p-3 transition-colors ${
@@ -269,8 +267,7 @@ function ProposalRow({
             {proposal.name}
           </span>
           <span className="text-[11px] text-muted-foreground">
-            {proposal.transactionIds.length} transaction
-            {proposal.transactionIds.length === 1 ? "" : "s"}
+            {t("transactionCount", { count: proposal.transactionIds.length })}
           </span>
         </div>
         <div className="mt-1 truncate text-xs text-muted-foreground">
@@ -280,7 +277,7 @@ function ProposalRow({
       <Switch
         checked={approved}
         onCheckedChange={onToggle}
-        aria-label={`Approve "${proposal.name}"`}
+        aria-label={t("approveAria", { name: proposal.name })}
       />
     </div>
   );

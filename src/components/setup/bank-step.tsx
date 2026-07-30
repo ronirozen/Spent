@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +42,8 @@ interface BankStepProps {
 }
 
 export function BankStep({ onComplete }: BankStepProps) {
+  const t = useTranslations("setup");
+  const tBanks = useTranslations("banks");
   const [filter, setFilter] = useState<"all" | BankKind>("all");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -137,20 +140,18 @@ export function BankStep({ onComplete }: BankStepProps) {
                 onClick={() => setSub("ready")}
                 className="self-start text-xs font-medium text-muted-foreground hover:text-foreground"
               >
-                ← back to connected accounts
+                {t("bankBackToConnected")}
               </button>
             )}
             <header className="space-y-2">
               <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Step 1 of 5 · Accounts
+                {t("bankStep")}
               </div>
               <h1 className="font-serif text-4xl leading-[1.08] tracking-tight">
-                Which accounts should Spent watch?
+                {t("bankTitleQuestion")}
               </h1>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Add every bank and card you want to track. Credentials are
-                encrypted with AES-256 and stored on this machine only, never
-                leaving your computer.
+                {t("bankDescription")}
               </p>
             </header>
 
@@ -168,7 +169,7 @@ export function BankStep({ onComplete }: BankStepProps) {
             <p className="text-xs italic text-muted-foreground">
               Don&apos;t see your bank?{" "}
               <a
-                href="https://github.com/Shaya16/Spent/issues"
+                href="https://github.com/ronirozen/Spent/issues"
                 target="_blank"
                 rel="noreferrer"
                 className="text-foreground underline decoration-primary underline-offset-2"

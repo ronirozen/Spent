@@ -152,7 +152,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               render={
                 <a
-                  href="https://github.com/Shaya16/Spent"
+                  href="https://github.com/ronirozen/Spent"
                   target="_blank"
                   rel="noreferrer"
                 >

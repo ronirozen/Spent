@@ -28,6 +28,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Spent",
   description: "Personal finance tracker with AI-powered categorization",
+  manifest: "/pwa/manifest.json?v=3",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Spent",
+  },
+  icons: {
+    apple: "/icon-192.png",
+  },
+};
+
+export const viewport = {
+  themeColor: "#09090b",
 };
 
 export default async function RootLayout({
@@ -46,7 +59,7 @@ export default async function RootLayout({
       className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <I18nProvider locale={locale} messages={messages as Record<string, unknown>}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <QueryProvider>

@@ -174,6 +174,14 @@ async function runScrape(
   if (!result.success) {
     const errorType = result.errorType ?? "GENERIC";
     console.error(`[scraper] failed (${errorType}):`, result.errorMessage);
+
+    // Some banks show an error message on the page when no transactions exist in the date range,
+    // which the scraper captures as a generic error. We intercept it here and treat it as success with 0 transactions.
+    if (result.errorMessage?.includes("לא מצאנו תנועות שמתאימות לנתונים שבחרת")) {
+      console.log(`[scraper] intercepted "no transactions" error for ${provider}, returning empty accounts.`);
+      return { success: true, accounts: [] };
+    }
+
     const friendly = FRIENDLY_ERRORS[errorType];
     const detail = result.errorMessage
       ? sanitizeError(new Error(result.errorMessage))

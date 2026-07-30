@@ -76,7 +76,7 @@ function AIForm({ settings }: { settings: AppSettings }) {
     mutationFn: () =>
       saveAIConfig({
         provider,
-        apiKey: provider === "claude" && apiKey ? apiKey : undefined,
+        apiKey: (provider === "claude" || provider === "gemini") && apiKey ? apiKey : undefined,
         ollamaUrl: provider === "ollama" ? ollamaUrl : undefined,
         ollamaModel: provider === "ollama" ? ollamaModel : undefined,
       }),
@@ -100,6 +100,11 @@ function AIForm({ settings }: { settings: AppSettings }) {
                 id: "claude" as const,
                 title: t("providerClaudeTitle"),
                 desc: t("providerClaudeDesc"),
+              },
+              {
+                id: "gemini" as const,
+                title: t("providerGeminiTitle"),
+                desc: t("providerGeminiDesc"),
               },
               {
                 id: "ollama" as const,
@@ -144,6 +149,27 @@ function AIForm({ settings }: { settings: AppSettings }) {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-ant-..."
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("leaveBlankHint")}
+            </p>
+          </div>
+        </SettingCard>
+      )}
+
+      {provider === "gemini" && (
+        <SettingCard
+          title={t("geminiKeyCardTitle")}
+          description={t("geminiKeyCardDescription")}
+        >
+          <div className="space-y-2">
+            <Label htmlFor="gemini-key">{t("apiKeyLabel")}</Label>
+            <Input
+              id="gemini-key"
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="AIzaSy..."
             />
             <p className="text-xs text-muted-foreground">
               {t("leaveBlankHint")}

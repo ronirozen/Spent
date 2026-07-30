@@ -133,7 +133,7 @@ export function testBankConnection(
 }
 
 export function saveAIConfig(config: {
-  provider: "claude" | "ollama" | "none";
+  provider: "claude" | "gemini" | "ollama" | "none";
   apiKey?: string;
   ollamaUrl?: string;
   ollamaModel?: string;

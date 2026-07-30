@@ -21,6 +21,7 @@ import {
 import { BANK_PROVIDERS } from "@/lib/types";
 import { ProviderBadge } from "@/components/setup/provider-badge";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type RowStatus =
   | "idle"
@@ -51,11 +52,7 @@ interface SyncProgressDialogProps {
   onSubmitOtp?: (syncRunId: number, code: string) => Promise<void>;
 }
 
-const STAGE_LABELS: Record<string, string> = {
-  "ollama-start": "Starting Ollama…",
-  categorizing: "Categorizing with AI…",
-  "memory-hit": "Recognized from memory",
-};
+// STAGE_LABELS moved inside to use translations
 
 export function SyncProgressDialog({
   open,
@@ -68,6 +65,17 @@ export function SyncProgressDialog({
   onClose,
   onSubmitOtp,
 }: SyncProgressDialogProps) {
+  const t = useTranslations("syncProgressDialog");
+  const getStageLabel = (s: string | null) => {
+    if (!s) return t("reachingOut");
+    switch (s) {
+      case "ollama-start": return t("startingOllama");
+      case "categorizing": return t("categorizingWithAi");
+      case "memory-hit": return t("recognizedFromMemory");
+      default: return t("working");
+    }
+  };
+
   const fullRows = useMemo(() => {
     const map = new Map(rows.map((r) => [r.provider, r]));
     return providers.map<ProviderRow>(
@@ -97,18 +105,16 @@ export function SyncProgressDialog({
           <DialogTitle className="mt-4 text-center font-serif text-2xl font-normal">
             {done
               ? aiWarning
-                ? "Synced — categorization skipped"
-                : "All synced!"
-              : "Syncing your accounts"}
+                ? t("syncedCategorizationSkipped")
+                : t("allSynced")
+              : t("syncingYourAccounts")}
           </DialogTitle>
           <DialogDescription className="mt-1 text-center text-xs">
             {done
               ? aiWarning
-                ? "Connect an AI provider to auto-categorize transactions."
-                : "Pulling fresh data from your banks. You're up to date."
-              : stage
-                ? STAGE_LABELS[stage] ?? "Working…"
-                : "Reaching out to your banks…"}
+                ? t("connectAiPrompt")
+                : t("pullingFreshData")
+              : getStageLabel(stage)}
           </DialogDescription>
         </div>
 
@@ -125,11 +131,11 @@ export function SyncProgressDialog({
         {summary && (
           <div className="mx-6 mb-4 mt-2 overflow-hidden rounded-xl border border-border bg-card p-4">
             <div className="flex items-center justify-around gap-3 text-center">
-              <SummaryStat label="New" value={summary.added} accent />
+              <SummaryStat label={t("new")} value={summary.added} accent />
               <Divider />
-              <SummaryStat label="Updated" value={summary.updated} />
+              <SummaryStat label={t("updated")} value={summary.updated} />
               <Divider />
-              <SummaryStat label="Categorized" value={summary.categorized} />
+              <SummaryStat label={t("categorized")} value={summary.categorized} />
             </div>
           </div>
         )}
@@ -159,7 +165,7 @@ export function SyncProgressDialog({
               size="sm"
               nativeButton={false}
               className="self-start sm:self-auto"
-              render={<Link href="/settings/ai">Connect AI</Link>}
+              render={<Link href="/settings/ai">{t("connectAi")}</Link>}
             />
           </div>
         )}
@@ -175,6 +181,7 @@ function ProviderRowView({
   row: ProviderRow;
   onSubmitOtp?: (syncRunId: number, code: string) => Promise<void>;
 }) {
+  const t = useTranslations("syncProgressDialog");
   const info = BANK_PROVIDERS.find((b) => b.id === row.provider);
   const label = info?.name ?? row.provider;
   const color = info?.color ?? "#888";
@@ -213,22 +220,22 @@ function ProviderRowView({
         <div className="relative min-w-0 flex-1">
           <div className="truncate text-sm font-medium">{label}</div>
           <div className="truncate text-[11px] text-muted-foreground">
-            {row.status === "idle" && "Waiting…"}
-            {row.status === "running" && "Pulling transactions…"}
+            {row.status === "idle" && t("waiting")}
+            {row.status === "running" && t("pullingTransactions")}
             {row.status === "awaiting-otp" &&
-              "Enter the one-time code we just sent you"}
+              t("enterOtp")}
             {row.status === "manual-2fa" && (
               <span className="inline-flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" />
-                Solve the 2FA in the popup window
+                {t("solve2fa")}
               </span>
             )}
             {row.status === "done" &&
               (row.added === 0 && row.updated === 0
-                ? "Already up to date"
-                : `+${row.added} new${row.updated ? ` · ${row.updated} updated` : ""}`)}
+                ? t("alreadyUpToDate")
+                : row.updated ? t("newAndUpdated", { added: row.added, updated: row.updated }) : t("newOnly", { added: row.added }))}
             {row.status === "error" &&
-              (row.errorMessage?.slice(0, 60) ?? "Failed")}
+              (row.errorMessage?.slice(0, 60) ?? t("failed"))}
           </div>
         </div>
 
@@ -254,6 +261,7 @@ function OtpInputArea({
   syncRunId: number;
   onSubmit: (syncRunId: number, code: string) => Promise<void>;
 }) {
+  const t = useTranslations("syncProgressDialog");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -268,7 +276,7 @@ function OtpInputArea({
       await onSubmit(syncRunId, trimmed);
       setCode("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not submit the code.");
+      setError(err instanceof Error ? err.message : t("couldNotSubmit"));
     } finally {
       setSubmitting(false);
     }
@@ -285,17 +293,17 @@ function OtpInputArea({
         onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
         inputMode="numeric"
         pattern="[0-9]*"
-        placeholder="6-digit code"
+        placeholder={t("sixDigitCode")}
         className="font-mono"
         disabled={submitting}
-        aria-label="One-time code"
+        aria-label={t("oneTimeCode")}
       />
       <Button
         type="submit"
         size="sm"
         disabled={submitting || code.trim().length < 4}
       >
-        {submitting ? "Submitting…" : "Submit"}
+        {submitting ? t("submitting") : t("submit")}
       </Button>
       {error && (
         <p className="absolute -bottom-5 start-0 text-[11px] text-destructive">
@@ -313,6 +321,7 @@ function StatusBadge({
   status: RowStatus;
   color: string;
 }) {
+  const t = useTranslations("syncProgressDialog");
   if (status === "running") {
     return (
       <Loader2
@@ -326,7 +335,7 @@ function StatusBadge({
       <div
         className="flex h-6 w-6 items-center justify-center rounded-full"
         style={{ background: "var(--status-heads-up)" }}
-        aria-label="Waiting for one-time code"
+        aria-label={t("waitingForOtp")}
       >
         <ShieldCheck className="h-3.5 w-3.5 text-background" strokeWidth={2.5} />
       </div>

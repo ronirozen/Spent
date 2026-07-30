@@ -1,0 +1,31 @@
+diff --git a/node_modules/israeli-bank-scrapers/lib/scrapers/discount.js b/node_modules/israeli-bank-scrapers/lib/scrapers/discount.js
+index 730371d..6599a39 100644
+--- a/node_modules/israeli-bank-scrapers/lib/scrapers/discount.js
++++ b/node_modules/israeli-bank-scrapers/lib/scrapers/discount.js
+@@ -57,6 +57,18 @@ async function fetchAccountData(page, options) {
+   for (const accountNumber of accounts) {
+     const txnsUrl = `${apiSiteUrl}/lastTransactions/${accountNumber}/Date?IsCategoryDescCode=True&IsTransactionDetails=True&IsEventNames=True&IsFutureTransactionFlag=True&FromDate=${startDateStr}`;
+     const txnsResult = await (0, _fetch.fetchGetWithinPage)(page, txnsUrl);
++
++    // If the bank returns "no transactions" for THIS account, we shouldn't abort the whole scrape.
++    // We just add it with empty transactions.
++    if (txnsResult && txnsResult.Error && txnsResult.Error.MsgText && txnsResult.Error.MsgText.includes("לא מצאנו תנועות שמתאימות לנתונים שבחרת")) {
++      accountsData.push({
++        accountNumber,
++        balance: undefined,
++        txns: []
++      });
++      continue;
++    }
++
+     if (!txnsResult || txnsResult.Error || !txnsResult.CurrentAccountLastTransactions) {
+       return {
+         success: false,
+@@ -117,6 +129,7 @@ class DiscountScraper extends _baseScraperWithBrowser.BaseScraperWithBrowser {
+     };
+   }
+   async fetchData() {
++    await new Promise(r => setTimeout(r, 10000));
+     return fetchAccountData(this.page, this.options);
+   }
+ }

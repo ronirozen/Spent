@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AIProvider } from "./types";
 import { ClaudeProvider } from "./providers/claude";
+import { GeminiProvider } from "./providers/gemini";
 import { OllamaProvider } from "./providers/ollama";
 import { getSetting } from "../db/queries/settings";
 import { decrypt } from "../lib/encryption";
@@ -9,7 +10,7 @@ import { decrypt } from "../lib/encryption";
 export function createAIProvider(): AIProvider | null {
   const provider = getSetting("ai_provider");
 
-  if (provider === "claude") {
+  if (provider === "claude" || provider === "gemini") {
     const encryptedKey = getSetting("ai_api_key_encrypted");
     const iv = getSetting("ai_api_key_iv");
     const authTag = getSetting("ai_api_key_auth_tag");
@@ -22,7 +23,8 @@ export function createAIProvider(): AIProvider | null {
       authTag: Buffer.from(authTag, "hex"),
     });
 
-    return new ClaudeProvider(apiKey);
+    if (provider === "claude") return new ClaudeProvider(apiKey);
+    if (provider === "gemini") return new GeminiProvider(apiKey);
   }
 
   if (provider === "ollama") {

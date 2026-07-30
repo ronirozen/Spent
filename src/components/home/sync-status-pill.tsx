@@ -192,8 +192,8 @@ export function SyncStatusPill({
             <span className="font-medium">{state.label}</span>
             {nextText && !syncActive && (
               <>
-                <span className="text-muted-foreground/60">·</span>
-                <span className="text-muted-foreground">{nextText}</span>
+                <span className="hidden sm:inline text-muted-foreground/60">·</span>
+                <span className="hidden sm:inline text-muted-foreground">{nextText}</span>
               </>
             )}
           </button>

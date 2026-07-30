@@ -129,8 +129,42 @@ async function fire(): Promise<void> {
   state.running = true;
   console.log("[scheduler] running");
   try {
-    await runAllWorkspaces(undefined, undefined, "scheduled");
+    const summaries = await runAllWorkspaces(undefined, undefined, "scheduled");
     console.log("[scheduler] done");
+    
+    // Web Push Notification Logic
+    const totalAdded = summaries.reduce((acc, s) => acc + s.added, 0);
+    const { listPushSubscriptions, getVapidKeys } = require("@/server/db/queries/push-subscriptions");
+    const webpush = require("web-push");
+    
+    if (totalAdded > 0) {
+      const subs = listPushSubscriptions();
+      if (subs.length > 0) {
+        const keys = getVapidKeys();
+        webpush.setVapidDetails("mailto:test@example.com", keys.publicKey, keys.privateKey);
+        
+        for (const sub of subs) {
+          try {
+            await webpush.sendNotification(
+              {
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth },
+              },
+              JSON.stringify({
+                title: "Spent Auto-Sync Complete",
+                body: `Synced ${totalAdded} new transactions.`,
+                data: { url: "/" },
+              })
+            );
+          } catch (e: any) {
+            console.error("Failed to send push notification to", sub.endpoint, e);
+            if (e.statusCode === 410) {
+               require("@/server/db/queries/push-subscriptions").deletePushSubscription(sub.endpoint);
+            }
+          }
+        }
+      }
+    }
   } catch (err) {
     console.error("[scheduler] run failed:", err);
   } finally {

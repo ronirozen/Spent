@@ -17,9 +17,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SectionShell, SettingCard } from "@/components/settings/section-shell";
 import { WorkspaceNameCard } from "@/components/settings/workspace-controls";
+import { PwaPushToggle } from "@/components/pwa-push-toggle";
 import { getSettings, getSummary, updateSettings } from "@/lib/api";
 import { formatCurrency } from "@/lib/formatters";
 import type { Locale } from "@/i18n/routing";
+import pkg from "../../../../package.json";
 
 function todayLocalISO(): string {
   const d = new Date();
@@ -67,6 +69,15 @@ export default function GeneralSettingsPage() {
             initialEnabled={settings.autoSyncEnabled}
             initialTime={settings.autoSyncTime}
           />
+          <SettingCard
+            title="Push Notifications & PWA"
+            description="Manage push notifications and install this app."
+          >
+            <PwaPushToggle />
+          </SettingCard>
+          <div className="mt-8 text-center text-xs text-muted-foreground">
+            Spent v{pkg.version}
+          </div>
         </>
       ) : (
         <SettingCard>
