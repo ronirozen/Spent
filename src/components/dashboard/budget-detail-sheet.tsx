@@ -297,9 +297,11 @@ function DetailContent({ data }: { data: CategoryDetail }) {
           <Card>
             <CardLabel>{t("vsLastMonth")}</CardLabel>
             <div className="mt-1 font-serif text-2xl tabular-nums">
-              {data.prevSpent > 0
-                ? `${data.spent - data.prevSpent >= 0 ? "+" : "-"}${formatCurrency(Math.abs(data.spent - data.prevSpent))}`
-                : "—"}
+              <span dir="ltr">
+                {data.prevSpent > 0
+                  ? `${data.spent - data.prevSpent >= 0 ? "+" : "-"}${formatCurrency(Math.abs(data.spent - data.prevSpent))}`
+                  : "—"}
+              </span>
             </div>
             <div className="mt-0.5 text-xs text-muted-foreground">
               {data.prevSpent > 0 ? (
