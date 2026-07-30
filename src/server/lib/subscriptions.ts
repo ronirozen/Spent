@@ -6,6 +6,7 @@ import {
   createSubscriptionAlert,
   getSubscriptions,
   linkTransactionToSubscription,
+  updateSubscription,
   Subscription
 } from "@/server/db/queries/subscriptions";
 import { getVapidKeys, listPushSubscriptions, deletePushSubscription } from "@/server/db/queries/push-subscriptions";
@@ -18,6 +19,9 @@ interface TransactionData {
   description: string;
   subscriptionId: number | null;
   kind: "expense" | "income" | "transfer";
+  type: string;
+  installmentNumber: number | null;
+  installmentTotal: number | null;
 }
 
 function normalizeMerchantName(name: string): string {
@@ -35,7 +39,7 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
 
   // 1. Fetch transactions from last 6 months
   const rows = db.prepare(`
-    SELECT id, date, charged_amount as amount, description, subscription_id as subscriptionId, kind
+    SELECT id, date, charged_amount as amount, description, subscription_id as subscriptionId, kind, type, installment_number as installmentNumber, installment_total as installmentTotal
     FROM transactions
     WHERE workspace_id = ? 
       AND status = 'completed' 
@@ -48,9 +52,7 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
   const existingSubs = getSubscriptions(workspaceId);
   const subMap = new Map<string, Subscription>();
   for (const sub of existingSubs) {
-    if (sub.status === 'active') {
-      subMap.set(normalizeMerchantName(sub.name), sub);
-    }
+    subMap.set(normalizeMerchantName(sub.name), sub);
   }
 
   // 2. Group by merchant
@@ -115,8 +117,8 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
         }
 
         const currentAbsAmount = Math.abs(txn.amount);
-        // If this transaction is > 5% higher than the baseline/previous amount
-        if (currentAbsAmount > previousAmount * 1.05 && existingSub.type === "expense") {
+        // If this transaction is > 5% higher than the baseline/previous amount, and sub is active
+        if (existingSub.status === "active" && currentAbsAmount > previousAmount * 1.05 && existingSub.type === "expense") {
           // Check if an alert already exists for this transaction
           const existingAlertCount = db.prepare(`
             SELECT COUNT(*) as count FROM subscription_alerts 
@@ -135,6 +137,14 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
         
         // Update baseline to the latest transaction amount
         previousAmount = currentAbsAmount;
+        
+        // If this is the last installment, cancel the subscription
+        if (txn.type === 'installments' && txn.installmentNumber != null && txn.installmentTotal != null) {
+          if (txn.installmentNumber === txn.installmentTotal && existingSub.status === "active") {
+            updateSubscription(workspaceId, existingSub.id, { status: "cancelled" });
+            existingSub.status = "cancelled";
+          }
+        }
       }
     }
   }
