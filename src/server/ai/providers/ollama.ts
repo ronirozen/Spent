@@ -89,6 +89,7 @@ function parseResponse(
         index: number;
         categoryName: string;
         confidence?: unknown;
+        isSubscription?: unknown;
       };
       const name = typed.categoryName.trim();
       const isExisting = validSet.has(name.toLowerCase());
@@ -98,6 +99,7 @@ function parseResponse(
         categoryName: name,
         isNew: !isExisting,
         confidence: parseConfidence(typed.confidence),
+        isSubscription: typed.isSubscription === true,
       });
     }
     return results;

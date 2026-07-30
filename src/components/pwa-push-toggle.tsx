@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -22,6 +23,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function PwaPushToggle() {
+  const t = useTranslations("settings.general.pwa");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
@@ -32,7 +34,9 @@ export function PwaPushToggle() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
-      navigator.serviceWorker.ready.then((reg) => {
+      navigator.serviceWorker.register("/sw.js").then(() => {
+        return navigator.serviceWorker.ready;
+      }).then((reg) => {
         setRegistration(reg);
         reg.pushManager.getSubscription().then((sub) => {
           if (sub) {
@@ -46,7 +50,7 @@ export function PwaPushToggle() {
 
   const handleToggle = async (checked: boolean) => {
     if (!registration) {
-      toast.error("Service worker not registered yet. Please refresh.");
+      toast.error(t("serviceWorkerMissing"));
       return;
     }
 
@@ -73,13 +77,13 @@ export function PwaPushToggle() {
 
           setSubscription(sub);
           setIsSubscribed(true);
-          toast.success("Push notifications enabled!");
+          toast.success(t("enabledSuccess"));
         } else {
-          toast.error("Notification permission denied.");
+          toast.error(t("permissionDenied"));
         }
       } catch (error) {
         console.error("Failed to subscribe:", error);
-        toast.error("Failed to enable push notifications.");
+        toast.error(t("enabledError"));
       }
     } else {
       if (subscription) {
@@ -95,10 +99,10 @@ export function PwaPushToggle() {
           await subscription.unsubscribe();
           setSubscription(null);
           setIsSubscribed(false);
-          toast.success("Push notifications disabled.");
+          toast.success(t("disabledSuccess"));
         } catch (error) {
           console.error("Failed to unsubscribe:", error);
-          toast.error("Failed to disable push notifications.");
+          toast.error(t("disabledError"));
         }
       }
     }
@@ -107,7 +111,7 @@ export function PwaPushToggle() {
   if (!("serviceWorker" in navigator && "PushManager" in window)) {
     return (
       <div className="text-sm text-muted-foreground">
-        Push notifications are not supported in this browser.
+        {t("notSupported")}
       </div>
     );
   }
@@ -116,7 +120,7 @@ export function PwaPushToggle() {
     <div className="flex items-center space-x-2">
       <Bell className="w-5 h-5 text-muted-foreground" />
       <Label htmlFor="push-toggle" className="flex-1 cursor-pointer">
-        Enable push notifications on this device
+        {t("enablePush")}
       </Label>
       <Switch
         id="push-toggle"

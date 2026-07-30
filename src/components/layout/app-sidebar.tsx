@@ -9,6 +9,7 @@ import {
   ArrowLeftRight,
   Settings as SettingsIcon,
   Star,
+  RefreshCw,
 } from "lucide-react";
 import {
   Sidebar,
@@ -49,6 +50,12 @@ const NAV: NavDef[] = [
     labelKey: "transactions",
     Icon: ArrowLeftRight,
     match: (p: string) => p.startsWith("/transactions"),
+  },
+  {
+    href: "/subscriptions",
+    labelKey: "subscriptions",
+    Icon: RefreshCw,
+    match: (p: string) => p.startsWith("/subscriptions"),
   },
 ];
 

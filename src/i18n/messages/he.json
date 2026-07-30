@@ -34,6 +34,7 @@
     "home": "בית",
     "budget": "תקציב",
     "transactions": "תנועות",
+    "subscriptions": "מנויים",
     "settings": "הגדרות",
     "starOnGitHub": "תייגו ב־GitHub",
     "brandTagline": "הכסף שלכם · קוד פתוח"
@@ -214,6 +215,29 @@
     "previous": "הקודם",
     "next": "הבא"
   },
+  "subscriptions": {
+    "pageTitle": "מנויים",
+    "subtitle": "מעקב אחר הוצאות קבועות והכנסות חוזרות.",
+    "fixedMonthlyExpenses": "הוצאות קבועות",
+    "recurringMonthlyIncome": "הכנסות חוזרות",
+    "disposableIncome": "הכנסה פנויה",
+    "priceHikesDetected": "זוהו עליות מחירים",
+    "increasedFromTo": "החיוב עלה מ-{oldPrice} ל-{newPrice}",
+    "noActiveSubscriptions": "לא זוהו מנויים פעילים עדיין.",
+    "amount": "סכום",
+    "frequency": "תדירות",
+    "type": "סוג",
+    "merchant": "בית עסק",
+    "typeIncome": "הכנסה",
+    "typeExpense": "הוצאה",
+    "freqMonthly": "חודשי"
+  },
+  "notifications": {
+    "title": "התראות",
+    "empty": "אין התראות חדשות.",
+    "dismiss": "הסר",
+    "dismissAll": "הסר הכל"
+  },
   "dashboard": {
     "syncing": "מסנכרן…",
     "syncAndCategorize": "סנכרון וסיווג",
@@ -345,7 +369,19 @@
       "runsInIsraelTime": "רץ לפי שעון ישראל. כבוי כברירת מחדל כדי למנוע התחברויות בנקאיות מפתיעות.",
       "timeOfDay": "שעת היום",
       "timeOfDayHint": "פורמט 24 שעות, אזור Asia/Jerusalem. רוב הבנקים מעדכנים תנועות בלילה, אז שעות הבוקר עובדות טוב.",
-      "failedToSave": "השמירה נכשלה"
+      "failedToSave": "השמירה נכשלה",
+      "pwa": {
+        "title": "התראות דחיפה ואפליקציה (PWA)",
+        "description": "נהל התראות דחיפה והתקן את האפליקציה.",
+        "enablePush": "הפעל התראות דחיפה במכשיר זה",
+        "notSupported": "התראות דחיפה אינן נתמכות בדפדפן זה.",
+        "enabledSuccess": "התראות דחיפה הופעלו!",
+        "enabledError": "הפעלת התראות דחיפה נכשלה.",
+        "disabledSuccess": "התראות דחיפה כובו.",
+        "disabledError": "כיבוי התראות דחיפה נכשל.",
+        "serviceWorkerMissing": "ה-Service worker טרם נרשם. אנא רענן את העמוד.",
+        "permissionDenied": "הרשאת התראות נדחתה."
+      }
     },
     "appearance": {
       "title": "מראה",

@@ -315,18 +315,18 @@ export function updateTransactionCategory(
 
 export function batchUpdateCategories(
   workspaceId: number,
-  updates: { id: number; categoryId: number; aiConfidence?: number | null }[]
+  updates: { id: number; categoryId: number; aiConfidence?: number | null; isSubscription?: boolean }[]
 ): void {
   const db = getDb();
   const stmt = db.prepare(
     `UPDATE transactions
-     SET category_id = ?, category_source = 'ai', ai_confidence = ?, updated_at = datetime('now')
+     SET category_id = ?, category_source = 'ai', ai_confidence = ?, is_subscription_inferred = ?, updated_at = datetime('now')
      WHERE workspace_id = ? AND id = ? AND category_source IS NOT 'user'`
   );
 
   db.transaction(() => {
-    for (const { id, categoryId, aiConfidence } of updates) {
-      stmt.run(categoryId, aiConfidence ?? null, workspaceId, id);
+    for (const { id, categoryId, aiConfidence, isSubscription } of updates) {
+      stmt.run(categoryId, aiConfidence ?? null, isSubscription ? 1 : 0, workspaceId, id);
     }
   })();
 }

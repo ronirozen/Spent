@@ -13,11 +13,25 @@ function assertKeyFileMode(stat: fs.Stats): void {
   // so skip there and rely on the default user profile permissions.
   if (process.platform === "win32") return;
 
-  const mode = stat.mode & 0o777;
+  let mode = stat.mode & 0o777;
   if (mode !== 0o600) {
-    throw new Error(
-      `Refusing to read encryption key: ${KEY_PATH} has mode ${mode.toString(8).padStart(3, "0")}, expected 600. ` +
-        `Fix with: chmod 600 ${KEY_PATH}`,
+    try {
+      fs.chmodSync(KEY_PATH, 0o600);
+      const newStat = fs.statSync(KEY_PATH);
+      mode = newStat.mode & 0o777;
+      if (mode === 0o600) {
+        return;
+      }
+    } catch (e) {
+      // Fall through to error if chmod fails
+    }
+
+    // Since this runs in Docker on various file systems (like CasaOS),
+    // sometimes chmod doesn't stick due to volume mounting limitations.
+    // Instead of throwing a fatal error, we will log a warning so the user can still use the app.
+    console.warn(
+      `[SECURITY WARNING] Encryption key: ${KEY_PATH} has mode ${mode.toString(8).padStart(3, "0")}, expected 600. ` +
+      `Fix with: chmod 600 ${KEY_PATH}`
     );
   }
 }

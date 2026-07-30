@@ -13,12 +13,6 @@ export function formatCurrency(
   locale?: Locale,
 ): string {
   const bcp = bcp47(locale);
-  if (currency === "ILS") {
-    return `₪${Math.abs(amount).toLocaleString(bcp, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  }
   return new Intl.NumberFormat(bcp, {
     style: "currency",
     currency,
