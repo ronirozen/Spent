@@ -1,9 +1,9 @@
 # Use a Node.js LTS slim image based on Debian Bookworm
 FROM node:22-bookworm-slim
 
-# Install dependencies: Chromium, fonts, and build tools (for better-sqlite3 compilation if prebuilts are missing)
+# Install dependencies: Chromium, fonts, build tools, and xvfb for headful browser support
 RUN apt-get update && apt-get install -y \
-    chromium \
+    chromium xvfb xauth \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
     python3 build-essential \
     --no-install-recommends \
@@ -34,5 +34,8 @@ RUN npm run build
 # Expose the application port
 EXPOSE 41234
 
-# Start the application, binding to 0.0.0.0 for LAN access
-CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "41234"]
+# Make the startup script executable
+RUN chmod +x /app/docker-start.sh
+
+# Start the application using the wrapper script
+CMD ["/app/docker-start.sh"]

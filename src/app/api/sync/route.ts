@@ -1,3 +1,4 @@
+import { detectSubscriptions } from "@/server/lib/subscriptions";
 import {
   runAllWorkspaces,
   syncWorkspace,
@@ -60,11 +61,15 @@ export async function POST(request: Request) {
         const summaries: WorkspaceSummary[] = [];
         if (headerPresent) {
           const workspaceId = getWorkspaceIdFromRequest(request);
-          summaries.push(
-            await syncWorkspace(workspaceId, filterCredentialId, send)
-          );
+          const summary = await syncWorkspace(workspaceId, filterCredentialId, send);
+          summaries.push(summary);
+          await detectSubscriptions(workspaceId);
         } else {
-          summaries.push(...(await runAllWorkspaces(filterCredentialId, send)));
+          const allSummaries = await runAllWorkspaces(filterCredentialId, send);
+          summaries.push(...allSummaries);
+          for (const summary of allSummaries) {
+            await detectSubscriptions(summary.workspaceId);
+          }
         }
 
         const totalAdded = summaries.reduce((s, w) => s + w.added, 0);

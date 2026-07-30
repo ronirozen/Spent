@@ -34,6 +34,7 @@
     "home": "Home",
     "budget": "Budget",
     "transactions": "Transactions",
+    "subscriptions": "Subscriptions",
     "settings": "Settings",
     "starOnGitHub": "Star on GitHub",
     "brandTagline": "YOUR MONEY · OPEN SOURCE"
@@ -214,6 +215,29 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "subscriptions": {
+    "pageTitle": "Subscriptions",
+    "subtitle": "Track your fixed burn rate and recurring income.",
+    "fixedMonthlyExpenses": "Fixed Monthly Expenses",
+    "recurringMonthlyIncome": "Recurring Monthly Income",
+    "disposableIncome": "Disposable Income",
+    "priceHikesDetected": "Price Hikes Detected",
+    "increasedFromTo": "Increased from {oldPrice} to {newPrice}",
+    "noActiveSubscriptions": "No active subscriptions detected yet.",
+    "amount": "Amount",
+    "frequency": "Frequency",
+    "type": "Type",
+    "merchant": "Merchant",
+    "typeIncome": "income",
+    "typeExpense": "expense",
+    "freqMonthly": "Monthly"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications.",
+    "dismiss": "Dismiss",
+    "dismissAll": "Dismiss all"
+  },
   "dashboard": {
     "syncing": "Syncing…",
     "syncAndCategorize": "Sync & Categorize",
@@ -345,7 +369,19 @@
       "runsInIsraelTime": "Runs in Israel time. Disabled by default to avoid surprise bank logins.",
       "timeOfDay": "Time of day",
       "timeOfDayHint": "24-hour, Asia/Jerusalem. Most banks post transactions overnight, so early morning works well.",
-      "failedToSave": "Failed to save"
+      "failedToSave": "Failed to save",
+      "pwa": {
+        "title": "Push Notifications",
+        "description": "Receive background alerts on your device for things like subscription price hikes or when you're over budget.",
+        "enablePush": "Enable Push Notifications",
+        "enabledSuccess": "Push notifications enabled",
+        "permissionDenied": "Permission denied for push notifications",
+        "enabledError": "Failed to enable push notifications",
+        "disabledSuccess": "Push notifications disabled",
+        "disabledError": "Failed to disable push notifications",
+        "serviceWorkerMissing": "Service worker not registered yet. Please refresh.",
+        "notSupported": "Push notifications are not supported in this browser."
+      }
     },
     "appearance": {
       "title": "Appearance",

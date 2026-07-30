@@ -70,8 +70,8 @@ export default function GeneralSettingsPage() {
             initialTime={settings.autoSyncTime}
           />
           <SettingCard
-            title="Push Notifications & PWA"
-            description="Manage push notifications and install this app."
+            title={t("pwa.title")}
+            description={t("pwa.description")}
           >
             <PwaPushToggle />
           </SettingCard>

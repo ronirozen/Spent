@@ -10,6 +10,8 @@ export interface CategoryMapping {
   isNew?: boolean;
   /** How confident the AI is in this categorization (1-7). Missing/invalid → undefined. */
   confidence?: AIConfidence;
+  /** True when the AI identifies this transaction as a subscription. */
+  isSubscription?: boolean;
 }
 
 export interface TransactionForCategorization {

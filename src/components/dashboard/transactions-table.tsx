@@ -640,7 +640,7 @@ export function TransactionsTable({
                         />
                       </TableCell>
                       <TableCell
-                        className="text-end font-medium tabular-nums"
+                        className="text-right font-medium tabular-nums"
                         style={{ color: directionColor }}
                       >
                         {formatCurrency(txn.chargedAmount, "ILS", locale)}

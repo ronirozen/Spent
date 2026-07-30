@@ -91,7 +91,8 @@ Transactions:
 ${transactionLines}
 
 Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string from the list above), and "confidence" (integer 1-7).
-Example: [{"index": 0, "categoryName": "Groceries", "confidence": 7}, {"index": 1, "categoryName": "Transport", "confidence": 5}]
+Optionally add "isSubscription": true if this transaction looks like a recurring payment (e.g. Netflix, Spotify, gym membership, rent).
+Example: [{"index": 0, "categoryName": "Groceries", "confidence": 7}, {"index": 1, "categoryName": "Entertainment", "confidence": 5, "isSubscription": true}]
 
 ${CONFIDENCE_BLOCK}
 
@@ -115,9 +116,11 @@ Transactions:
 ${transactionLines}
 
 Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string), and "confidence" (integer 1-7). If you propose a new category, add "isNew": true.
+Optionally add "isSubscription": true if this transaction looks like a recurring payment.
 
 Existing category example: {"index": 0, "categoryName": "Groceries", "confidence": 7}
 New category example:      {"index": 3, "categoryName": "Pet Supplies", "isNew": true, "confidence": 5}
+Subscription example:      {"index": 1, "categoryName": "Entertainment", "confidence": 6, "isSubscription": true}
 
 ${CONFIDENCE_BLOCK}
 

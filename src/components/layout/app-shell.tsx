@@ -17,6 +17,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { NotificationCenter } from "./notification-center";
+
 export function PageHeader({
   title,
   meta,
@@ -43,9 +45,10 @@ export function PageHeader({
             </>
           )}
         </div>
-        {actions && (
-          <div className="flex shrink-0 items-center gap-2">{actions}</div>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {actions}
+          <NotificationCenter />
+        </div>
       </div>
     </header>
   );
