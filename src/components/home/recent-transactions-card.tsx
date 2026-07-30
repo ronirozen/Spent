@@ -57,6 +57,7 @@ export function RecentTransactionsCard({ items }: Props) {
                 </div>
               </div>
               <span
+                dir="ltr"
                 className={`shrink-0 text-sm tabular-nums ${
                   txn.kind === "income"
                     ? "text-[var(--status-on-track)]"
