@@ -89,13 +89,13 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
       }
 
       if (isMonthly) {
-        // Create a new subscription
-        const avgAmount = txns.reduce((sum, t) => sum + Math.abs(t.amount), 0) / txns.length;
+        // Create a new subscription with the most recent transaction's amount
+        const latestAmount = Math.abs(txns[txns.length - 1].amount);
         const type = txns[0].amount < 0 ? "expense" : "income";
         
         const newSubId = createSubscription(workspaceId, {
           name: txns[0].description,
-          amount: avgAmount,
+          amount: latestAmount,
           currency: "ILS", // We could infer this from the transaction, but default to ILS
           frequency: "monthly",
           type: type,
@@ -137,6 +137,12 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
         
         // Update baseline to the latest transaction amount
         previousAmount = currentAbsAmount;
+        
+        // Always keep the subscription's amount synced with the latest transaction
+        if (existingSub.amount !== currentAbsAmount) {
+          updateSubscription(workspaceId, existingSub.id, { amount: currentAbsAmount });
+          existingSub.amount = currentAbsAmount;
+        }
         
         // If this is the last installment, cancel the subscription after a month has passed
         if (txn.type === 'installments' && txn.installmentNumber != null && txn.installmentTotal != null) {
