@@ -64,6 +64,7 @@ import {
   toggleCategoryFilterSelection,
 } from "@/lib/transaction-filters";
 import { SortableTableHead } from "@/components/transactions/sortable-table-head";
+import { CategoryDropdownContent } from "@/components/transactions/category-dropdown-content";
 import type { SortOrder, TransactionSortField } from "@/lib/transaction-sort";
 import { cn } from "@/lib/utils";
 import { ProviderBadge } from "@/components/setup/provider-badge";
@@ -596,22 +597,10 @@ export function TransactionsTable({
                                 {categoryName}
                               </Badge>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
-                              {categoriesForKind(categoryKind).map((cat) => (
-                                <DropdownMenuItem
-                                  key={cat.id}
-                                  onClick={() =>
-                                    handleCategoryChange(txn.id, cat.id)
-                                  }
-                                >
-                                  <div
-                                    className="me-2 h-2 w-2 rounded-full"
-                                    style={{ backgroundColor: cat.color }}
-                                  />
-                                  {translateCategoryName(cat.name, tCat, cat.localName)}
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
+                            <CategoryDropdownContent 
+                              categories={categoriesForKind(categoryKind)} 
+                              onSelect={(categoryId) => handleCategoryChange(txn.id, categoryId)} 
+                            />
                           </DropdownMenu>
                           {txn.needsReview && (
                             <Button
