@@ -33,6 +33,7 @@ interface CategoryGridProps {
   from: string;
   to: string;
   viewMode: CategoryViewMode;
+  subscriptionFilter: "all" | "subscriptions" | "regular";
 }
 
 function applySort(list: CategoryWithData[], sort: Sort): CategoryWithData[] {
@@ -69,6 +70,7 @@ export function CategoryGrid({
   from,
   to,
   viewMode,
+  subscriptionFilter,
 }: CategoryGridProps) {
   const t = useTranslations("dashboard");
   const [filter, setFilter] = useState<Filter>("all");
@@ -254,6 +256,7 @@ export function CategoryGrid({
         categoryId={selectedId}
         from={from}
         to={to}
+        subscriptionFilter={subscriptionFilter}
         onClose={() => setSelectedId(null)}
       />
     </div>

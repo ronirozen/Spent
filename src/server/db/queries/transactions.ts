@@ -157,6 +157,7 @@ interface QueryParams {
   /** @deprecated Use credentialIds */
   credentialId?: number;
   credentialIds?: number[];
+  subscriptionFilter?: "all" | "subscriptions" | "regular";
 }
 
 function appendCredentialIdsFilter(
@@ -228,6 +229,7 @@ export function queryTransactions(
     conditions.push("t.provider = ?");
     values.push(params.provider);
   }
+  
   const credentialIds =
     params.credentialIds && params.credentialIds.length > 0
       ? params.credentialIds
@@ -235,6 +237,12 @@ export function queryTransactions(
         ? [params.credentialId]
         : undefined;
   appendCredentialIdsFilter(conditions, values, credentialIds, "t.");
+
+  if (params.subscriptionFilter === "subscriptions") {
+    conditions.push("t.subscription_id IS NOT NULL");
+  } else if (params.subscriptionFilter === "regular") {
+    conditions.push("t.subscription_id IS NULL");
+  }
 
   const where = `WHERE ${conditions.join(" AND ")}`;
 
@@ -335,7 +343,12 @@ export function batchUpdateCategories(
 export function getMonthlySummary(
   workspaceId: number,
   months: number
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): MonthlySummary[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT strftime('%Y-%m', date) as month,
@@ -357,7 +370,12 @@ export function getTopMerchants(
   from: string,
   to: string,
   limit = 10
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): MerchantSummary[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT description as name,
@@ -377,7 +395,12 @@ export function getCategoryBreakdown(
   workspaceId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): CategoryBreakdown[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT
@@ -406,7 +429,12 @@ export function getCategorySpendInRange(
   workspaceId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): CategorySpend[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT category_id as categoryId,
@@ -430,7 +458,12 @@ export function getTopMerchantPerCategory(
   workspaceId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): CategoryTopMerchant[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT category_id as categoryId, description as merchant, amount
@@ -457,7 +490,12 @@ export function getCategorySpendByDay(
   categoryId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): DailySpendPoint[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `WITH RECURSIVE days(d) AS (
@@ -493,7 +531,12 @@ export function getTopMerchantsForCategory(
   from: string,
   to: string,
   limit = 8
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): TopMerchantForCategory[] {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT description as merchant,
@@ -516,7 +559,12 @@ export function getPeriodTotal(
   workspaceId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): number {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   const row = getDb()
     .prepare(
       `SELECT COALESCE(SUM(ABS(charged_amount)), 0) as total
@@ -532,7 +580,12 @@ export function getPeriodCount(
   workspaceId: number,
   from: string,
   to: string
+,
+  filter?: "all" | "subscriptions" | "regular"
 ): number {
+
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   const row = getDb()
     .prepare(
       `SELECT COUNT(*) as count
@@ -817,7 +870,8 @@ export function getTransactionsSummary(
 export function getNeedsReviewCountByCategory(
   workspaceId: number,
   from: string,
-  to: string
+  to: string,
+  filter?: "all" | "subscriptions" | "regular"
 ): NeedsReviewCount[] {
   return getDb()
     .prepare(

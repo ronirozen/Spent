@@ -29,6 +29,7 @@ export async function GET(
   );
   const from = searchParams.get("from") ?? defaultFrom;
   const to = searchParams.get("to") ?? defaultTo;
+  const subscriptionFilter = (searchParams.get("subscriptionFilter") as "all" | "subscriptions" | "regular") || "all";
 
   const fromDate = new Date(from);
   const prevMonthStart = new Date(
@@ -59,7 +60,7 @@ export async function GET(
 
   // Daily spend: sum per-day across the target ids.
   const perTargetDaily = targetIds.map((tid) =>
-    getCategorySpendByDay(workspaceId, tid, from, to)
+    getCategorySpendByDay(workspaceId, tid, from, to, subscriptionFilter)
   );
   const dailyMap = new Map<string, number>();
   for (const series of perTargetDaily) {
@@ -141,7 +142,7 @@ export async function GET(
   }
 
   const prevPerTarget = targetIds.map((tid) =>
-    getCategorySpendByDay(workspaceId, tid, prevFrom, prevTo)
+    getCategorySpendByDay(workspaceId, tid, prevFrom, prevTo, subscriptionFilter)
   );
   let prevSpent = 0;
   for (const series of prevPerTarget) {
@@ -162,6 +163,7 @@ export async function GET(
       sort: "date",
       order: "desc",
       limit: 50,
+      subscriptionFilter,
     }
   );
 
