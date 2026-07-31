@@ -1,0 +1,18 @@
+name: Deploy to CasaOS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Fetch and deploy latest code
+        run: |
+          cd /DATA/AppData/spent
+          git fetch origin main
+          git reset --hard origin/main
+          docker compose up -d --build
