@@ -4,6 +4,7 @@
   "packageManager": "pnpm@10.26.0",
   "private": true,
   "scripts": {
+    "deploy": "node scripts/deploy.js",
     "dev": "concurrently -p none \"serwist build --watch\" \"next dev -H 127.0.0.1 -p 3000\"",
     "build": "next build && serwist build",
     "start": "next start -H 0.0.0.0 -p 41234",
@@ -67,6 +68,7 @@
     "esbuild": "^0.28.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.11",
+    "ssh2": "^1.17.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   },
