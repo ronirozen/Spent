@@ -886,3 +886,16 @@ export function getNeedsReviewCountByCategory(
     )
     .all(workspaceId, from, to) as NeedsReviewCount[];
 }
+
+export function setTransactionSubscriptionId(
+  workspaceId: number,
+  id: number,
+  subscriptionId: number | null
+) {
+  const db = getDb();
+  db.prepare(
+    `UPDATE transactions
+     SET subscription_id = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ? AND workspace_id = ?`
+  ).run(subscriptionId, id, workspaceId);
+}

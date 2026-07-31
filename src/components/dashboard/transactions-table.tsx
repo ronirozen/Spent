@@ -652,7 +652,7 @@ export function TransactionsTable({
                                 {opt.label}
                               </DropdownMenuItem>
                             ))}
-                            {!txn.subscriptionId && (
+                            {!txn.subscriptionId ? (
                               <DropdownMenuItem
                                 onClick={async () => {
                                   setUpdatingId(txn.id);
@@ -664,6 +664,8 @@ export function TransactionsTable({
                                     });
                                     if (res.ok) {
                                       toast.success(t("subscriptionAddedToast"));
+                                      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+                                      queryClient.invalidateQueries({ queryKey: ["summary"] });
                                     } else {
                                       throw new Error("Failed to add");
                                     }
@@ -675,6 +677,32 @@ export function TransactionsTable({
                                 }}
                               >
                                 {t("markAsSubscription")}
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={async () => {
+                                  setUpdatingId(txn.id);
+                                  try {
+                                    const res = await fetch(`/api/transactions/${txn.id}`, {
+                                      method: 'PATCH',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ subscriptionId: null }),
+                                    });
+                                    if (res.ok) {
+                                      toast.success(t("subscriptionRemovedToast"));
+                                      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+                                      queryClient.invalidateQueries({ queryKey: ["summary"] });
+                                    } else {
+                                      throw new Error("Failed to remove");
+                                    }
+                                  } catch (e) {
+                                    toast.error(e instanceof Error ? e.message : "Failed");
+                                  } finally {
+                                    setUpdatingId(null);
+                                  }
+                                }}
+                              >
+                                {t("removeFromSubscription")}
                               </DropdownMenuItem>
                             )}
                             {txn.isExcluded ? (
