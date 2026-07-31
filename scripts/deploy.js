@@ -50,7 +50,7 @@ conn.on('ready', () => {
     
     stream.on('close', (code, signal) => {
       if (code !== 0) {
-        console.error(\`\nDeployment failed with exit code \${code}\`);
+        console.error(`\nDeployment failed with exit code ${code}`);
         process.exit(code);
       } else {
         console.log('\nDeployment finished successfully!');
