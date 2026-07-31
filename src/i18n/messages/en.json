@@ -230,7 +230,8 @@
     "merchant": "Merchant",
     "typeIncome": "income",
     "typeExpense": "expense",
-    "freqMonthly": "Monthly"
+    "freqMonthly": "Monthly",
+    "installmentProgress": "Payment {n} of {total}"
   },
   "notifications": {
     "title": "Notifications",
@@ -937,6 +938,11 @@
   "categoryDetailSheet": {
     "monthlyBudget": "Monthly budget",
     "parentGroup": "Parent group",
+    "displayName": "Display Name",
+    "displayNameHint": "Override the default category name. Leave empty to use the default.",
+    "nameSaved": "Category name saved.",
+    "nameSavedSuccess": "Category name saved.",
+    "errorSaveName": "Failed to save category name",
     "description": "Description",
     "editCategory": "Edit category",
     "expenseCategory": "Expense category",

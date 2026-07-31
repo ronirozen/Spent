@@ -389,6 +389,17 @@ export function updateCategoryDescription(
   });
 }
 
+export function updateCategoryLocalName(
+  categoryId: number,
+  localName: string | null
+) {
+  return fetchJSON<{ success: boolean }>(`/api/categories/${categoryId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ localName }),
+  });
+}
+
 export function setCategoryParent(
   categoryId: number,
   parentId: number | null

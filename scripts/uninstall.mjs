@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Mirror of setup.mjs: tear down everything `npm run setup` installed.
+// Mirror of setup.mjs: tear down everything `pnpm run setup` installed.
 // The data/ directory and the repo itself are deliberately NOT touched:
 // uninstall is about removing the always-on service and the menubar, not
 // the user's transactions and encryption key.

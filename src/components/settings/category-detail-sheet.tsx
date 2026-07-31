@@ -40,6 +40,7 @@ import {
   updateCategoryDescription,
 } from "@/lib/api";
 import { translateCategoryName } from "@/lib/i18n-data";
+import { updateCategoryLocalName } from "@/lib/api";
 import type { Category, CategoryWithData } from "@/lib/types";
 
 const NONE_VALUE = "__none__";
@@ -109,12 +110,12 @@ function Body({
   );
   const eligibleParents = sameKind
     .filter((c) => c.parentId == null)
-    .sort((a, b) => translateCategoryName(a.name, tCat).localeCompare(translateCategoryName(b.name, tCat)));
+    .sort((a, b) => translateCategoryName(a.name, tCat, a.localName).localeCompare(translateCategoryName(b.name, tCat, b.localName)));
   const childCategories = useMemo(
     () =>
       allCategories
         .filter((c) => c.parentId === category.id)
-        .sort((a, b) => translateCategoryName(a.name, tCat).localeCompare(translateCategoryName(b.name, tCat))),
+        .sort((a, b) => translateCategoryName(a.name, tCat, a.localName).localeCompare(translateCategoryName(b.name, tCat, b.localName))),
     [allCategories, category.id, tCat]
   );
   const isParentGroup = childCategories.length > 0 || data?.isParent === true;
@@ -137,10 +138,10 @@ function Body({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <SheetTitle>{translateCategoryName(category.name, tCat)}</SheetTitle>
+            <SheetTitle>{translateCategoryName(category.name, tCat, category.localName)}</SheetTitle>
             <SheetDescription className="mt-0.5">
               {category.kind === "expense" ? t("expense") : t("income")} {t("category")}
-              {data?.parentName ? ` · ${t("inParent", { parentName: translateCategoryName(data.parentName, tCat) })}` : ""}
+              {data?.parentName ? ` · ${t("inParent", { parentName: translateCategoryName(data.parentName, tCat, category.localName) })}` : ""}
             </SheetDescription>
           </div>
         </div>
@@ -157,6 +158,8 @@ function Body({
           category={category}
           eligibleParents={eligibleParents}
         />
+
+        <NameSection category={category} />
 
         <DescriptionSection category={category} />
 
@@ -221,9 +224,9 @@ function DeleteCategorySection({
     onError: (err: Error) => {
       const errorNames = parseDeleteCategoryError(err.message);
       const names = errorNames 
-        ? errorNames.map(n => translateCategoryName(n, tCat))
+        ? errorNames.map(n => translateCategoryName(n, tCat, null))
         : (childCategories.length > 0
-          ? childCategories.map((c) => translateCategoryName(c.name, tCat))
+          ? childCategories.map((c) => translateCategoryName(c.name, tCat, c.localName))
           : null);
       if (names && names.length > 0) {
         toast.error(t("deleteHasChildrenNamed", { names: names.join(", ") }));
@@ -251,7 +254,7 @@ function DeleteCategorySection({
             {isParentGroup && childCategories.length > 0 ? (
               <ul className="mt-2 list-disc space-y-0.5 ps-4 text-xs text-foreground/80">
                 {childCategories.map((child) => (
-                  <li key={child.id}>{translateCategoryName(child.name, tCat)}</li>
+                  <li key={child.id}>{translateCategoryName(child.name, tCat, child.localName)}</li>
                 ))}
               </ul>
             ) : null}
@@ -273,7 +276,7 @@ function DeleteCategorySection({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t("confirmDeleteTitle", { name: translateCategoryName(category.name, tCat) })}
+              {t("confirmDeleteTitle", { name: translateCategoryName(category.name, tCat, category.localName) })}
             </DialogTitle>
             <DialogDescription>
               {t("confirmDeleteDescription", { count: transactionCount })}
@@ -456,7 +459,7 @@ function GroupSection({
                 value === NONE_VALUE
                   ? t("noParent")
                   : eligibleParents.find((p) => String(p.id) === value)?.name 
-                      ? translateCategoryName(eligibleParents.find((p) => String(p.id) === value)!.name, tCat) 
+                      ? translateCategoryName(eligibleParents.find((p) => String(p.id) === value)!.name, tCat, eligibleParents.find((p) => String(p.id) === value)!.localName) 
                       : t("noParent")
               }
             </SelectValue>
@@ -465,7 +468,7 @@ function GroupSection({
             <SelectItem value={NONE_VALUE}>{t("noParent")}</SelectItem>
             {eligibleParents.map((p) => (
               <SelectItem key={p.id} value={String(p.id)}>
-                {translateCategoryName(p.name, tCat)}
+                {translateCategoryName(p.name, tCat, p.localName)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -524,7 +527,7 @@ function DescriptionSection({ category }: { category: Category }) {
           onBlur={handleBlur}
           rows={4}
           maxLength={DESCRIPTION_MAX}
-          placeholder={t("descriptionPlaceholder", { name: translateCategoryName(category.name, tCat) })}
+          placeholder={t("descriptionPlaceholder", { name: translateCategoryName(category.name, tCat, category.localName) })}
           className="block w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           disabled={mutation.isPending}
         />
@@ -533,6 +536,61 @@ function DescriptionSection({ category }: { category: Category }) {
           <span className="tabular-nums">
             {value.length} / {DESCRIPTION_MAX}
           </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NameSection({ category }: { category: Category }) {
+  const t = useTranslations("categoryDetailSheet");
+  const tCat = useTranslations("categoriesSeeded");
+  const queryClient = useQueryClient();
+  const [value, setValue] = useState(category.localName ?? "");
+
+  useEffect(() => {
+    setValue(category.localName ?? "");
+  }, [category.localName]);
+
+  const mutation = useMutation({
+    mutationFn: (next: string | null) =>
+      updateCategoryLocalName(category.id, next),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["summary"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions-summary"] });
+      toast.success(t("nameSaved", { fallback: t("nameSavedSuccess") }));
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || t("errorSaveName", { fallback: "Failed to save category name" }));
+    },
+  });
+
+  const handleBlur = () => {
+    const trimmed = value.trim();
+    const current = (category.localName ?? "").trim();
+    if (trimmed === current) return;
+    mutation.mutate(trimmed.length === 0 ? null : trimmed);
+  };
+
+  return (
+    <section>
+      <div className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        {t("displayName", { fallback: "Display Name" })}
+      </div>
+      <div className="mt-3 rounded-xl border border-border bg-card p-4 space-y-2">
+        <Label htmlFor={`name-${category.id}`}>{t("displayName", { fallback: "Display Name" })}</Label>
+        <Input
+          id={`name-${category.id}`}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={handleBlur}
+          placeholder={translateCategoryName(category.name, tCat, null)}
+          disabled={mutation.isPending}
+        />
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>{t("displayNameHint", { fallback: "Override the default category name. Leave empty to use the default." })}</span>
         </div>
       </div>
     </section>

@@ -32,7 +32,7 @@ export function CategorySnapshotCard({ items }: Props) {
         {items.map((item) => (
           <Row
             key={item.categoryId}
-            item={{ ...item, name: translateCategoryName(item.name, tCat) }}
+            item={{ ...item, name: translateCategoryName(item.name, tCat, item.localName) }}
           />
         ))}
       </div>

@@ -4,6 +4,7 @@ import {
   setCategoryParent,
   updateCategoryBudgetMode,
   updateCategoryDescription,
+  updateCategoryLocalName,
 } from "@/server/db/queries/categories";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 
@@ -30,6 +31,7 @@ export async function PATCH(
   const typed = body as {
     budgetMode?: unknown;
     description?: unknown;
+    localName?: unknown;
     parentId?: unknown;
   };
 
@@ -69,6 +71,33 @@ export async function PATCH(
       workspaceId,
       categoryId,
       typed.description as string | null
+    );
+    if (!ok) {
+      return NextResponse.json({ error: "not found" }, { status: 404 });
+    }
+    applied = true;
+  }
+
+  if (typed.localName !== undefined) {
+    if (typed.localName !== null && typeof typed.localName !== "string") {
+      return NextResponse.json(
+        { error: "localName must be a string or null" },
+        { status: 400 }
+      );
+    }
+    if (
+      typeof typed.localName === "string" &&
+      typed.localName.length > 100
+    ) {
+      return NextResponse.json(
+        { error: `localName must be 100 chars or fewer` },
+        { status: 400 }
+      );
+    }
+    const ok = updateCategoryLocalName(
+      workspaceId,
+      categoryId,
+      typed.localName as string | null
     );
     if (!ok) {
       return NextResponse.json({ error: "not found" }, { status: 404 });

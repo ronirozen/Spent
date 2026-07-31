@@ -185,7 +185,7 @@ const TRANSACTION_LIST_FROM = `
   LEFT JOIN bank_credentials bc ON t.credential_id = bc.id`;
 
 const TRANSACTION_LIST_SELECT = `
-  SELECT t.*, c.name AS category_name, c.color AS category_color,
+  SELECT t.*, c.name AS category_name, c.local_name AS category_local_name, c.color AS category_color,
          bc.label AS account_label
   ${TRANSACTION_LIST_FROM}`;
 
@@ -572,6 +572,7 @@ interface TransactionRow {
   created_at: string;
   updated_at: string;
   category_name?: string | null;
+  category_local_name?: string | null;
   category_color?: string | null;
   account_label?: string | null;
 }
@@ -607,6 +608,7 @@ function mapTransactionRow(row: unknown): TransactionWithCategory {
     createdAt: r.created_at,
     updatedAt: r.updated_at,
     categoryName: r.category_name ?? null,
+    categoryLocalName: r.category_local_name ?? null,
     categoryColor: r.category_color ?? null,
   };
 }

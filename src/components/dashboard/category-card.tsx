@@ -72,7 +72,7 @@ export function CategoryCard({ data, onClick }: CategoryCardProps) {
   const percent = Math.min(999, Math.round(data.percentSpent));
   const vsLast = data.vsLastMonth;
   const isTracking = data.budgetMode === "tracking";
-  const categoryName = translateCategoryName(data.categoryName, tCat);
+  const categoryName = translateCategoryName(data.categoryName, tCat, data.categoryLocalName);
   const parentName = data.parentName ? translateCategoryName(data.parentName, tCat) : null;
   return (
     <button

@@ -19,17 +19,19 @@ ENV TZ=Asia/Jerusalem
 WORKDIR /app
 
 # Copy dependency definition files
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY patches ./patches
 
 # Install dependencies
-RUN npm install
+RUN corepack enable pnpm && pnpm install --network-concurrency 1 --child-concurrency 1 --dangerously-allow-all-builds
 
 # Copy the rest of the application
 COPY . .
 
 # Build the Next.js application
-RUN npm run build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+RUN pnpm run build
 
 # Expose the application port
 EXPOSE 41234

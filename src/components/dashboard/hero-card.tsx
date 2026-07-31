@@ -81,7 +81,7 @@ export function HeroCard({ data, loading, monthLabel }: HeroCardProps) {
 
   const legend = [
     ...topFour.map((c) => ({
-      name: translateCategoryName(c.categoryName, tCat),
+      name: translateCategoryName(c.categoryName, tCat, c.categoryLocalName),
       color: c.categoryColor,
       amount: c.spent,
       pct: grandTotal > 0 ? (c.spent / grandTotal) * 100 : 0,
