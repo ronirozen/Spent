@@ -211,6 +211,8 @@
     "excludeToast": "הוחרג מהסכומים",
     "excludeMerchantToast": "‘{merchant}’ יוחרג מעכשיו",
     "includeToast": "הוחזר לסכומים",
+    "markAsSubscription": "סמן כמנוי",
+    "subscriptionAddedToast": "נוסף כמנוי",
     "paginationRange": "{from} עד {to} מתוך {total}",
     "previous": "הקודם",
     "next": "הבא"

@@ -663,6 +663,29 @@ export function TransactionsTable({
                                 {opt.label}
                               </DropdownMenuItem>
                             ))}
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                setUpdatingId(txn.id);
+                                try {
+                                  const res = await fetch('/api/subscriptions', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ transactionId: txn.id }),
+                                  });
+                                  if (res.ok) {
+                                    toast.success(t("subscriptionAddedToast"));
+                                  } else {
+                                    throw new Error("Failed to add");
+                                  }
+                                } catch (e) {
+                                  toast.error(e instanceof Error ? e.message : "Failed");
+                                } finally {
+                                  setUpdatingId(null);
+                                }
+                              }}
+                            >
+                              {t("markAsSubscription")}
+                            </DropdownMenuItem>
                             {txn.isExcluded ? (
                               <DropdownMenuItem
                                 onClick={() => handleExcludeToggle(txn, false)}
