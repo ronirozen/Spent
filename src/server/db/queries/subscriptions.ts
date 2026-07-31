@@ -40,7 +40,12 @@ export function getSubscriptions(workspaceId: number): Subscription[] {
     WHERE s.workspace_id = ?
     ORDER BY s.amount DESC
   `).all(workspaceId) as Subscription[];
-  return rows;
+
+  // Normalize bad currency codes (e.g. from early scrapers)
+  return rows.map(r => {
+    if (r.currency === "₪") r.currency = "ILS";
+    return r;
+  });
 }
 
 export function createSubscription(
