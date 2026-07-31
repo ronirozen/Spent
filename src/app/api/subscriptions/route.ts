@@ -34,10 +34,11 @@ export async function POST(request: Request) {
     if (existing) {
       subId = existing.id;
     } else {
+      const normalizedCurrency = txn.currency === "₪" ? "ILS" : (txn.currency || "ILS");
       subId = createSubscription(workspaceId, {
         name: txn.description,
         amount: Math.abs(txn.amount),
-        currency: txn.currency || "ILS",
+        currency: normalizedCurrency,
         frequency: "monthly",
         type: isExpense ? "expense" : "income",
         status: "active"
