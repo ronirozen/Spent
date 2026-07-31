@@ -40,7 +40,14 @@ export function SubscriptionList({ subscriptions }: { subscriptions: Subscriptio
         <TableBody>
           {subscriptions.map((sub) => (
             <TableRow key={sub.id}>
-              <TableCell className="font-medium">{sub.name}</TableCell>
+              <TableCell className="font-medium">
+                <div>{sub.name}</div>
+                {sub.latestInstallmentNumber != null && sub.latestInstallmentTotal != null && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {t("installmentProgress", { n: sub.latestInstallmentNumber, total: sub.latestInstallmentTotal })}
+                  </div>
+                )}
+              </TableCell>
               <TableCell>
                 <Badge variant="outline" className={sub.type === 'income' ? 'text-green-500' : 'text-red-500'}>
                   {sub.type === 'income' ? t("typeIncome") : t("typeExpense")}

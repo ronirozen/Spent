@@ -230,7 +230,8 @@
     "merchant": "בית עסק",
     "typeIncome": "הכנסה",
     "typeExpense": "הוצאה",
-    "freqMonthly": "חודשי"
+    "freqMonthly": "חודשי",
+    "installmentProgress": "תשלום {n} מתוך {total}"
   },
   "notifications": {
     "title": "התראות",

@@ -12,6 +12,8 @@ export interface Subscription {
   status: "active" | "cancelled";
   createdAt: string;
   updatedAt: string;
+  latestInstallmentNumber?: number | null;
+  latestInstallmentTotal?: number | null;
 }
 
 export interface SubscriptionAlert {
@@ -30,11 +32,13 @@ export interface SubscriptionAlert {
 export function getSubscriptions(workspaceId: number): Subscription[] {
   const db = getDb();
   const rows = db.prepare(`
-    SELECT id, workspace_id as workspaceId, name, amount, currency,
-           frequency, type, status, created_at as createdAt, updated_at as updatedAt
-    FROM subscriptions
-    WHERE workspace_id = ?
-    ORDER BY amount DESC
+    SELECT s.id, s.workspace_id as workspaceId, s.name, s.amount, s.currency,
+           s.frequency, s.type, s.status, s.created_at as createdAt, s.updated_at as updatedAt,
+           (SELECT installment_number FROM transactions t WHERE t.subscription_id = s.id AND t.type = 'installments' ORDER BY date DESC LIMIT 1) as latestInstallmentNumber,
+           (SELECT installment_total FROM transactions t WHERE t.subscription_id = s.id AND t.type = 'installments' ORDER BY date DESC LIMIT 1) as latestInstallmentTotal
+    FROM subscriptions s
+    WHERE s.workspace_id = ?
+    ORDER BY s.amount DESC
   `).all(workspaceId) as Subscription[];
   return rows;
 }

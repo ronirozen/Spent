@@ -230,7 +230,8 @@
     "merchant": "Merchant",
     "typeIncome": "income",
     "typeExpense": "expense",
-    "freqMonthly": "Monthly"
+    "freqMonthly": "Monthly",
+    "installmentProgress": "Payment {n} of {total}"
   },
   "notifications": {
     "title": "Notifications",
