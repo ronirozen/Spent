@@ -23,10 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CategoryDropdownContent } from "@/components/transactions/category-dropdown-content";
 import {
   Plus,
   HelpCircle,
@@ -434,20 +433,10 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                         </Badge>
                         <ChevronDown className="h-3 w-3 text-muted-foreground" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {(sameKindCategoriesQuery.data ?? []).map((cat) => (
-                          <DropdownMenuItem
-                            key={cat.id}
-                            onClick={() => handleChangeCategory(txn.id, cat.id)}
-                          >
-                            <div
-                              className="me-2 h-2 w-2 rounded-full"
-                              style={{ backgroundColor: cat.color }}
-                            />
-                            {translateCategoryName(cat.name, tCat, cat.localName)}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
+                      <CategoryDropdownContent 
+                        categories={sameKindCategoriesQuery.data ?? []} 
+                        onSelect={(categoryId) => handleChangeCategory(txn.id, categoryId)} 
+                      />
                     </DropdownMenu>
                     <div className="shrink-0 text-sm font-medium tabular-nums">
                       {formatCurrency(txn.chargedAmount)}
@@ -600,20 +589,10 @@ function NeedsReviewSection({
                   </Badge>
                   <ChevronDown className="h-3 w-3 text-muted-foreground" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {categories.map((cat) => (
-                    <DropdownMenuItem
-                      key={cat.id}
-                      onClick={() => onChange(txn.id, cat.id)}
-                    >
-                      <div
-                        className="me-2 h-2 w-2 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      {translateCategoryName(cat.name, tCat, cat.localName)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
+                <CategoryDropdownContent 
+                  categories={categories} 
+                  onSelect={(categoryId) => onChange(txn.id, categoryId)} 
+                />
               </DropdownMenu>
               <Button
                 size="sm"
