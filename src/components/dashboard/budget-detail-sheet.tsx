@@ -411,7 +411,11 @@ function DetailContent({ data }: { data: CategoryDetail }) {
             <div className="flex items-center gap-2">
               <Select value={transactionFilter} onValueChange={(v: any) => setTransactionFilter(v)}>
                 <SelectTrigger className="h-7 w-[140px] text-xs bg-transparent border-border">
-                  <SelectValue />
+                  <SelectValue>
+                    {transactionFilter === "all" && t("filterAll")}
+                    {transactionFilter === "subscriptions" && t("filterSubscriptions")}
+                    {transactionFilter === "regular" && t("filterRegular")}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("filterAll")}</SelectItem>
