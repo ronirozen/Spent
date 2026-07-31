@@ -46,7 +46,7 @@ export function RecentTransactionsCard({ items }: Props) {
                   </div>
                   {txn.categoryName ? (
                     <CategoryBadge
-                      name={translateCategoryName(txn.categoryName, tCat)}
+                      name={translateCategoryName(txn.categoryName, tCat, txn.categoryLocalName)}
                       color={txn.categoryColor}
                     />
                   ) : (

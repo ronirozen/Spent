@@ -88,7 +88,7 @@ export function getRecentTransactionsForHome(
     .prepare(
       `SELECT t.id, t.date, t.description, t.charged_amount as chargedAmount,
               t.charged_currency as chargedCurrency, t.kind,
-              c.name as categoryName, c.color as categoryColor
+              c.name as categoryName, c.local_name as categoryLocalName, c.color as categoryColor
        FROM transactions t
        LEFT JOIN categories c ON t.category_id = c.id
        WHERE t.workspace_id = ? AND t.status = 'completed' AND t.kind != 'transfer'
@@ -104,6 +104,7 @@ export function getRecentTransactionsForHome(
     chargedCurrency: string | null;
     kind: "expense" | "income" | "transfer";
     categoryName: string | null;
+    categoryLocalName: string | null;
     categoryColor: string | null;
   }>;
   return rows;

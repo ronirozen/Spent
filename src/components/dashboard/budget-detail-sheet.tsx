@@ -213,7 +213,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                 : t("expenseCategory")}
             </div>
             <SheetTitle className="truncate font-serif text-2xl font-normal">
-              {translateCategoryName(data.category.name, tCat)}
+              {translateCategoryName(data.category.name, tCat, data.category.localName)}
             </SheetTitle>
           </div>
           {data.category.kind !== "income" && (
@@ -430,7 +430,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                           className="border-none p-0"
                           style={{ color: txn.categoryColor ?? undefined }}
                         >
-                          {txn.categoryName ? translateCategoryName(txn.categoryName, tCat) : t("uncategorized")}
+                          {txn.categoryName ? translateCategoryName(txn.categoryName, tCat, txn.categoryLocalName) : t("uncategorized")}
                         </Badge>
                         <ChevronDown className="h-3 w-3 text-muted-foreground" />
                       </DropdownMenuTrigger>
@@ -444,7 +444,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                               className="me-2 h-2 w-2 rounded-full"
                               style={{ backgroundColor: cat.color }}
                             />
-                            {translateCategoryName(cat.name, tCat)}
+                            {translateCategoryName(cat.name, tCat, cat.localName)}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
@@ -505,7 +505,7 @@ function ChildrenBreakdownSection({
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: c.color }}
                 />
-                <span className="truncate text-sm font-medium">{translateCategoryName(c.name, tCat)}</span>
+                <span className="truncate text-sm font-medium">{translateCategoryName(c.name, tCat, c.localName)}</span>
               </div>
               <div className="flex shrink-0 items-center gap-3 text-xs tabular-nums">
                 <div className="text-end">
@@ -596,7 +596,7 @@ function NeedsReviewSection({
                       color: txn.categoryColor ?? undefined,
                     }}
                   >
-                    {txn.categoryName ? translateCategoryName(txn.categoryName, tCat) : t("uncategorized")}
+                    {txn.categoryName ? translateCategoryName(txn.categoryName, tCat, txn.categoryLocalName) : t("uncategorized")}
                   </Badge>
                   <ChevronDown className="h-3 w-3 text-muted-foreground" />
                 </DropdownMenuTrigger>
@@ -610,7 +610,7 @@ function NeedsReviewSection({
                         className="me-2 h-2 w-2 rounded-full"
                         style={{ backgroundColor: cat.color }}
                       />
-                      {translateCategoryName(cat.name, tCat)}
+                      {translateCategoryName(cat.name, tCat, cat.localName)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

@@ -264,7 +264,7 @@ export function TransactionsTable({
   const categoryLabels = categoryFilter
     .map((id) => categories.find((c) => c.id === id))
     .filter((c): c is Category => c != null)
-    .map((c) => translateCategoryName(c.name, tCat));
+    .map((c) => translateCategoryName(c.name, tCat, c.localName));
 
   const categoryDisplayValue = formatMultiFilterDisplay(
     categoryLabels,
@@ -298,7 +298,7 @@ export function TransactionsTable({
     const nodes: React.ReactNode[] = [];
     for (const cat of items) {
       const hasChildren = categories.some((c) => c.parentId === cat.id);
-      const name = translateCategoryName(cat.name, tCat);
+      const name = translateCategoryName(cat.name, tCat, cat.localName);
       nodes.push(
         <MultiFilterOption
           key={cat.id}
@@ -508,7 +508,7 @@ export function TransactionsTable({
                     : "var(--status-over)";
                   const categoryKind: Kind = isIncome ? "income" : "expense";
                   const categoryName = txn.categoryName
-                    ? translateCategoryName(txn.categoryName, tCat)
+                    ? translateCategoryName(txn.categoryName, tCat, txn.categoryLocalName)
                     : t("rowUncategorized");
                   return (
                     <TableRow
@@ -608,7 +608,7 @@ export function TransactionsTable({
                                     className="me-2 h-2 w-2 rounded-full"
                                     style={{ backgroundColor: cat.color }}
                                   />
-                                  {translateCategoryName(cat.name, tCat)}
+                                  {translateCategoryName(cat.name, tCat, cat.localName)}
                                 </DropdownMenuItem>
                               ))}
                             </DropdownMenuContent>

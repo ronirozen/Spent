@@ -4,7 +4,7 @@ import { getDb } from "../index";
 import type { Category, CategoryKind } from "@/lib/types";
 
 const CATEGORY_COLUMNS =
-  "id, parent_id as parentId, name, color, icon, kind, budget_mode as budgetMode, description";
+  "id, parent_id as parentId, name, local_name as localName, color, icon, kind, budget_mode as budgetMode, description";
 
 export function getAllCategories(
   workspaceId: number,
@@ -115,6 +115,20 @@ export function updateCategoryDescription(
   const result = getDb()
     .prepare(
       "UPDATE categories SET description = ? WHERE workspace_id = ? AND id = ?"
+    )
+    .run(value, workspaceId, id);
+  return result.changes > 0;
+}
+
+export function updateCategoryLocalName(
+  workspaceId: number,
+  id: number,
+  localName: string | null
+): boolean {
+  const value = localName == null ? null : localName.trim() || null;
+  const result = getDb()
+    .prepare(
+      "UPDATE categories SET local_name = ? WHERE workspace_id = ? AND id = ?"
     )
     .run(value, workspaceId, id);
   return result.changes > 0;
@@ -239,6 +253,7 @@ export function createParentCategory(
     id: Number(result.lastInsertRowid),
     parentId: null,
     name: trimmed,
+    localName: null,
     color,
     icon,
     kind: input.kind,
@@ -341,6 +356,7 @@ export function ensureCategory(
     id: Number(result.lastInsertRowid),
     parentId,
     name: trimmed,
+    localName: null,
     color,
     icon,
     kind,

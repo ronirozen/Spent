@@ -202,7 +202,7 @@ You can change providers any time from **Settings → AI provider**. Existing ca
 
 - **Node.js 22+**
 - **macOS 13+**, **Ubuntu 22+** (with systemd), or **Windows 11**
-- **Build tools for the menubar** (only if you want the tray; `npm run setup` will offer to install these for you if they're missing):
+- **Build tools for the menubar** (only if you want the tray; `pnpm run setup` will offer to install these for you if they're missing):
   - macOS: Xcode Command Line Tools (`xcode-select --install`)
   - Windows: .NET 8 SDK (`winget install Microsoft.DotNet.SDK.8`)
 - A bank account with **2FA disabled** (most Israeli banks require this for automation — OneZero is the exception)
@@ -214,13 +214,13 @@ You can change providers any time from **Settings → AI provider**. Existing ca
 ```bash
 git clone https://github.com/ronirozen/Spent.git
 cd spent
-npm install
-npm run setup
+pnpm install
+pnpm run setup
 ```
 
-`npm run setup` does everything: builds the Next.js app, installs the always-on service (LaunchAgent on macOS / systemd on Linux / Task Scheduler on Windows), builds the platform menubar from source, installs it to the standard location, registers it to auto-start at login, and opens the dashboard. On Windows it also writes a `127.0.0.1 spent.localhost` line to your hosts file (the only step that asks for Administrator). macOS and Linux resolve `*.localhost` natively, so setup runs sudo-free there.
+`pnpm run setup` does everything: builds the Next.js app, installs the always-on service (LaunchAgent on macOS / systemd on Linux / Task Scheduler on Windows), builds the platform menubar from source, installs it to the standard location, registers it to auto-start at login, and opens the dashboard. On Windows it also writes a `127.0.0.1 spent.localhost` line to your hosts file (the only step that asks for Administrator). macOS and Linux resolve `*.localhost` natively, so setup runs sudo-free there.
 
-On Linux there is no native menubar. `npm run setup` installs the service and opens the browser. Control the service with `npm run service:*` (see below).
+On Linux there is no native menubar. `pnpm run setup` installs the service and opens the browser. Control the service with `pnpm run service:*` (see below).
 
 First launch of the menubar on macOS/Windows shows an unsigned-binary warning (Gatekeeper / SmartScreen). That's expected: you built it locally and didn't pay for a code-signing certificate. Right-click → Open (macOS) or "More info" → "Run anyway" (Windows). One-time.
 
@@ -241,32 +241,32 @@ In the browser:
 | What you want | Run |
 |---|---|
 | Just use the app (no coding) | Open `http://spent.localhost:41234` |
-| Code and see changes instantly | `npm run dev` → `http://127.0.0.1:3000` |
-| Update the always-on app after editing | `npm run service:reload` |
+| Code and see changes instantly | `pnpm run dev` → `http://127.0.0.1:3000` |
+| Update the always-on app after editing | `pnpm run service:reload` |
 
 Rare cases:
 
-- Changed the menu bar app source → `npm run menubar:install:mac` (or `:windows`) to rebuild and reinstall.
-- Changed install scripts or hostname → `npm run service:uninstall && npm run service:install`.
+- Changed the menu bar app source → `pnpm run menubar:install:mac` (or `:windows`) to rebuild and reinstall.
+- Changed install scripts or hostname → `pnpm run service:uninstall && pnpm run service:install`.
 
 ## Service commands
 
 | Command | What it does |
 |---|---|
-| `npm run service:status` | Running? Bound to loopback? |
-| `npm run service:start` / `:stop` | Start/stop now |
-| `npm run service:reload` | Rebuild and restart |
-| `npm run service:logs` | Tail server logs |
-| `npm run service:open` | Open the app in your browser |
-| `npm run service:uninstall` | Remove auto-start and hosts entry. `data/` is untouched. |
+| `pnpm run service:status` | Running? Bound to loopback? |
+| `pnpm run service:start` / `:stop` | Start/stop now |
+| `pnpm run service:reload` | Rebuild and restart |
+| `pnpm run service:logs` | Tail server logs |
+| `pnpm run service:open` | Open the app in your browser |
+| `pnpm run service:uninstall` | Remove auto-start and hosts entry. `data/` is untouched. |
 
 ## Uninstall
 
 ```bash
-npm run uninstall
+pnpm run uninstall
 ```
 
-Reverses everything `npm run setup` installed:
+Reverses everything `pnpm run setup` installed:
 
 - Stops the background service and removes the LaunchAgent / Task Scheduler entry / systemd unit.
 - Windows: removes the `127.0.0.1 spent.localhost` line from your hosts file (asks for Administrator). macOS/Linux don't have a hosts entry to remove unless you're upgrading from an older install — in that case the legacy `spent.local` line is cleaned up automatically.
@@ -282,7 +282,7 @@ If you only want to remove the menubar but keep the always-on web app:
 - **macOS**: `rm -rf ~/Applications/Spent.app` and remove "Spent" from System Settings → General → Login Items.
 - **Windows**: delete `%LOCALAPPDATA%\Programs\Spent\` and remove `Spent.lnk` from `shell:startup`.
 
-If you only want to remove the always-on service but keep the menubar (so it's there if you reinstall later): `npm run service:uninstall`.
+If you only want to remove the always-on service but keep the menubar (so it's there if you reinstall later): `pnpm run service:uninstall`.
 
 ## Security at a glance
 
@@ -305,7 +305,7 @@ Full threat model and responsible-disclosure policy → [SECURITY.md](SECURITY.m
 - `data/.encryption-key` — 32-byte AES key, mode `0600`
 - `~/Library/Logs/Spent/` (macOS) / `~/.local/state/spent/log/` (Linux) — service logs
 
-Back up `data/` like any other folder. To migrate to a new machine, copy `data/` over and run `npm run service:install`.
+Back up `data/` like any other folder. To migrate to a new machine, copy `data/` over and run `pnpm run service:install`.
 
 ## Architecture & code map
 
@@ -326,7 +326,7 @@ spent/
 │       ├── db/               SQLite singleton, migrations, query helpers
 │       ├── lib/              Encryption, dedup, transfer detection, pace
 │       └── scrapers/         Wrapper around israeli-bank-scrapers
-├── menubar/                  Tray companions (built locally by `npm run setup`)
+├── menubar/                  Tray companions (built locally by `pnpm run setup`)
 │   ├── mac/                  Swift MenuBarExtra app
 │   └── windows/              C# WinForms NotifyIcon app
 ├── scripts/service/          LaunchAgent / systemd / Task Scheduler installer

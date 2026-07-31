@@ -18,7 +18,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..");
 const SERVICE_INSTALL = path.join(HERE, "service", "install.mjs");
 const FRIENDLY_URL = "http://spent.localhost:41234";
-const NPM = process.platform === "win32" ? "npm.cmd" : "npm";
+const NPM = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 function step(msg) {
   console.log(`\n=> ${msg}`);
@@ -120,7 +120,7 @@ async function ensureMacPrereq() {
       lastMin = min;
     }
   }
-  console.error("   timed out after 30 minutes. Re-run `npm run setup` after install completes.");
+  console.error("   timed out after 30 minutes. Re-run `pnpm run setup` after install completes.");
   return false;
 }
 
@@ -141,7 +141,7 @@ async function ensureWindowsPrereq() {
     console.log("");
     console.error("winget is not available on this machine. Install .NET 8 SDK manually:");
     console.error("  https://dotnet.microsoft.com/download/dotnet/8.0");
-    console.error("Then re-run `npm run setup`.");
+    console.error("Then re-run `pnpm run setup`.");
     return false;
   }
 
@@ -177,7 +177,7 @@ async function ensureWindowsPrereq() {
     return true;
   }
   console.error("   .NET 8 SDK installed, but `dotnet` is not yet on PATH for this shell.");
-  console.error("   Close and reopen your terminal, then re-run `npm run setup`.");
+  console.error("   Close and reopen your terminal, then re-run `pnpm run setup`.");
   return false;
 }
 
@@ -185,8 +185,8 @@ function preflight() {
   if (!fs.existsSync(path.join(REPO_ROOT, "node_modules", "next"))) {
     fail(
       "Dependencies not installed. Run this first:\n" +
-      "  npm install\n" +
-      "Then re-run `npm run setup`.",
+      "  pnpm install\n" +
+      "Then re-run `pnpm run setup`.",
     );
   }
 
@@ -203,7 +203,7 @@ function preflight() {
       console.log("  - http://127.0.0.1:41234 will work normally.");
       console.log("  - http://spent.localhost:41234 may not resolve on older Windows builds.");
       console.log("To guarantee the friendly hostname, relaunch from an elevated");
-      console.log("PowerShell (Win+X -> 'Terminal (Admin)') and run `npm run service:install`.");
+      console.log("PowerShell (Win+X -> 'Terminal (Admin)') and run `pnpm run service:install`.");
       console.log("");
     }
   }
@@ -267,7 +267,7 @@ async function macSetup() {
   if (!ok) {
     step("Skipping menubar");
     console.log(`   Web app is installed and running at ${dashboardUrl()}`);
-    console.log("   Install Xcode Command Line Tools and re-run `npm run setup` to add the menubar.");
+    console.log("   Install Xcode Command Line Tools and re-run `pnpm run setup` to add the menubar.");
     return;
   }
 
@@ -327,7 +327,7 @@ async function windowsSetup() {
   if (!ok) {
     step("Skipping menubar");
     console.log(`   Web app is installed and running at ${dashboardUrl()}`);
-    console.log("   Install .NET 8 SDK and re-run `npm run setup` to add the menubar.");
+    console.log("   Install .NET 8 SDK and re-run `pnpm run setup` to add the menubar.");
     return;
   }
 
@@ -389,8 +389,8 @@ function addStartupShortcutWindows(exePath) {
 function linuxSetup() {
   step("Linux: no native tray");
   console.log("   Spent on Linux is web-only. The service is installed and");
-  console.log("   running. Control it with the npm scripts:");
-  console.log("     npm run service:status / :start / :stop / :reload / :logs");
+  console.log("   running. Control it with the pnpm scripts:");
+  console.log("     pnpm run service:status / :start / :stop / :reload / :logs");
 
   step("Opening dashboard");
   spawnSync("xdg-open", [dashboardUrl()], { stdio: "ignore" });
@@ -411,7 +411,7 @@ async function main() {
     done("server is healthy");
   } else {
     console.error("   server did not respond within 60s, continuing anyway.");
-    console.error(`   check logs: npm run service:logs`);
+    console.error(`   check logs: pnpm run service:logs`);
   }
 
   switch (process.platform) {
@@ -442,13 +442,13 @@ function printCheatSheet() {
   console.log("================================================================");
   console.log("");
   console.log("Useful commands:");
-  console.log("  npm run service:status         see if the service is running");
-  console.log("  npm run service:start          start the background service");
-  console.log("  npm run service:stop           stop the background service");
-  console.log("  npm run service:reload         rebuild and restart (after code edits)");
-  console.log("  npm run service:logs           tail the server logs");
-  console.log("  npm run service:open           open the dashboard in your browser");
-  console.log("  npm run uninstall              remove the service and menubar");
+  console.log("  pnpm run service:status         see if the service is running");
+  console.log("  pnpm run service:start          start the background service");
+  console.log("  pnpm run service:stop           stop the background service");
+  console.log("  pnpm run service:reload         rebuild and restart (after code edits)");
+  console.log("  pnpm run service:logs           tail the server logs");
+  console.log("  pnpm run service:open           open the dashboard in your browser");
+  console.log("  pnpm run uninstall              remove the service and menubar");
   console.log("");
   console.log("Tip: bookmark the URL above so the daily flow is one click.");
   console.log("");

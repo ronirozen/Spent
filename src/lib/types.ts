@@ -37,6 +37,7 @@ export interface Transaction {
 
 export interface TransactionWithCategory extends Transaction {
   categoryName: string | null;
+  categoryLocalName: string | null;
   categoryColor: string | null;
   isExcluded: boolean;
 }
@@ -49,6 +50,7 @@ export interface Category {
   id: number;
   parentId: number | null;
   name: string;
+  localName: string | null;
   color: string;
   icon: string | null;
   kind: CategoryKind;
@@ -106,6 +108,7 @@ export interface CategoryWithData {
   budgetSource: BudgetSource;
   childCount?: number;
   categoryName: string;
+  categoryLocalName: string | null;
   categoryColor: string;
   categoryIcon: string | null;
   budgetMode: BudgetMode;
@@ -177,6 +180,7 @@ export interface HomeCashFlow {
 export interface HomeCategorySnapshotItem {
   categoryId: number;
   name: string;
+  localName: string | null;
   color: string;
   spent: number;
   budget: number;
@@ -198,6 +202,7 @@ export interface HomeRecentTransaction {
   chargedCurrency: string | null;
   kind: "expense" | "income" | "transfer";
   categoryName: string | null;
+  categoryLocalName: string | null;
   categoryColor: string | null;
 }
 

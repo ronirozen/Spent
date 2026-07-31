@@ -141,7 +141,7 @@ export default function CategoriesSettingsPage() {
             {parents.map((parent) => (
               <GroupBlock
                 key={parent.id}
-                title={translateCategoryName(parent.name, tSeed)}
+                title={translateCategoryName(parent.name, tSeed, parent.localName)}
                 color={parent.color}
                 parent={parent}
                 onSelect={setOpenId}
@@ -277,7 +277,7 @@ function CategoryRow({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <span className="truncate">{translateCategoryName(category.name, tSeed)}</span>
+            <span className="truncate">{translateCategoryName(category.name, tSeed, category.localName)}</span>
           </div>
           {description ? (
             <div className="mt-0.5 truncate text-xs text-muted-foreground">

@@ -8,7 +8,11 @@ type TranslatorFn = ReturnType<typeof useTranslations<string>>;
 export function translateCategoryName(
   rawName: string,
   tCat: TranslatorFn,
+  localName?: string | null,
 ): string {
+  if (localName && localName.trim().length > 0) {
+    return localName.trim();
+  }
   try {
     const translated = tCat(rawName);
     return translated && translated !== rawName ? translated : rawName;

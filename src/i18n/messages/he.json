@@ -938,6 +938,11 @@
   "categoryDetailSheet": {
     "monthlyBudget": "תקציב חודשי",
     "parentGroup": "קבוצת אם",
+    "displayName": "שם תצוגה",
+    "displayNameHint": "דריסת שם הקטגוריה. השאירו ריק כדי להשתמש בשם ברירת המחדל.",
+    "nameSaved": "שם הקטגוריה נשמר.",
+    "nameSavedSuccess": "שם הקטגוריה נשמר.",
+    "errorSaveName": "שמירת שם הקטגוריה נכשלה",
     "description": "תיאור",
     "editCategory": "עריכת קטגוריה",
     "expenseCategory": "קטגוריית הוצאות",
