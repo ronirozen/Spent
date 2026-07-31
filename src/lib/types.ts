@@ -31,6 +31,8 @@ export interface Transaction {
   syncRunId: number;
   kind: "expense" | "income" | "transfer";
   needsReview: boolean;
+  subscriptionId: number | null;
+  isSubscriptionInferred: boolean;
   createdAt: string;
   updatedAt: string;
 }

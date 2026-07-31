@@ -25,6 +25,13 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CategoryDropdownContent } from "@/components/transactions/category-dropdown-content";
 import {
   Plus,
@@ -144,6 +151,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
   const t = useTranslations("budgetDetailSheet");
   const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
+  const [transactionFilter, setTransactionFilter] = useState<"all" | "subscriptions" | "regular">("all");
   const sameKindCategoriesQuery = useQuery({
     queryKey: ["categories", data.category.kind],
     queryFn: () => getCategories(data.category.kind),
@@ -192,6 +200,14 @@ function DetailContent({ data }: { data: CategoryDetail }) {
       })),
     [data.dailySpend]
   );
+
+  const filteredTransactions = useMemo(() => {
+    return data.transactions.filter((txn) => {
+      if (transactionFilter === "subscriptions") return txn.subscriptionId !== null;
+      if (transactionFilter === "regular") return txn.subscriptionId === null;
+      return true;
+    });
+  }, [data.transactions, transactionFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
@@ -390,26 +406,38 @@ function DetailContent({ data }: { data: CategoryDetail }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium">
-              {t("transactions")} · {data.transactionCount}
+              {t("transactions")} · {filteredTransactions.length}
             </h3>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 gap-1 text-xs"
-              disabled
-              title={t("manualEntryNotAvailable")}
-            >
-              <Plus className="h-3.5 w-3.5" /> {t("add")}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Select value={transactionFilter} onValueChange={(v: any) => setTransactionFilter(v)}>
+                <SelectTrigger className="h-7 w-[140px] text-xs bg-transparent border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("filterAll")}</SelectItem>
+                  <SelectItem value="subscriptions">{t("filterSubscriptions")}</SelectItem>
+                  <SelectItem value="regular">{t("filterRegular")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 gap-1 text-xs"
+                disabled
+                title={t("manualEntryNotAvailable")}
+              >
+                <Plus className="h-3.5 w-3.5" /> {t("add")}
+              </Button>
+            </div>
           </div>
           <div className="overflow-hidden rounded-2xl border bg-card">
-            {data.transactions.length === 0 ? (
+            {filteredTransactions.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
                 {t("noTransactions")}
               </div>
             ) : (
               <ul className="divide-y">
-                {data.transactions.map((txn) => (
+                {filteredTransactions.map((txn) => (
                   <li
                     key={txn.id}
                     className="flex items-center justify-between gap-3 px-4 py-2.5"

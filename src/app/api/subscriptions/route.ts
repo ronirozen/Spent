@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 import { getDb } from "@/server/db/index";
-import { createSubscription } from "@/server/db/queries/subscriptions";
+import { createSubscription, linkTransactionToSubscription, getSubscriptions } from "@/server/db/queries/subscriptions";
 
 export async function POST(request: Request) {
   try {
@@ -27,14 +27,25 @@ export async function POST(request: Request) {
 
     const isExpense = txn.amount < 0;
     
-    createSubscription(workspaceId, {
-      name: txn.description,
-      amount: Math.abs(txn.amount),
-      currency: txn.currency || "ILS",
-      frequency: "monthly",
-      type: isExpense ? "expense" : "income",
-      status: "active"
-    });
+    const existingSubs = getSubscriptions(workspaceId);
+    const existing = existingSubs.find(s => s.name.toLowerCase() === txn.description.toLowerCase());
+
+    let subId: number;
+    if (existing) {
+      subId = existing.id;
+    } else {
+      const normalizedCurrency = txn.currency === "₪" ? "ILS" : (txn.currency || "ILS");
+      subId = createSubscription(workspaceId, {
+        name: txn.description,
+        amount: Math.abs(txn.amount),
+        currency: normalizedCurrency,
+        frequency: "monthly",
+        type: isExpense ? "expense" : "income",
+        status: "active"
+      });
+    }
+
+    linkTransactionToSubscription(workspaceId, transactionId, subId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
