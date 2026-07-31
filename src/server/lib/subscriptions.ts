@@ -138,11 +138,14 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
         // Update baseline to the latest transaction amount
         previousAmount = currentAbsAmount;
         
-        // If this is the last installment, cancel the subscription
+        // If this is the last installment, cancel the subscription after a month has passed
         if (txn.type === 'installments' && txn.installmentNumber != null && txn.installmentTotal != null) {
           if (txn.installmentNumber === txn.installmentTotal && existingSub.status === "active") {
-            updateSubscription(workspaceId, existingSub.id, { status: "cancelled" });
-            existingSub.status = "cancelled";
+            const daysSince = diffDays(txn.date, new Date().toISOString());
+            if (daysSince > 30) {
+              updateSubscription(workspaceId, existingSub.id, { status: "cancelled" });
+              existingSub.status = "cancelled";
+            }
           }
         }
       }
