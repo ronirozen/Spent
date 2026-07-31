@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 import { updateSubscription } from "@/server/db/queries/subscriptions";
 
 export async function DELETE(
@@ -7,12 +7,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const headersList = await headers();
-    const workspaceId = Number(headersList.get("x-workspace-id"));
-    
-    if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace ID" }, { status: 400 });
-    }
+    const workspaceId = getWorkspaceIdFromRequest(request);
 
     const { id } = await params;
     const subscriptionId = Number(id);
