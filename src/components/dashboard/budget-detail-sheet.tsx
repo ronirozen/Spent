@@ -98,6 +98,7 @@ interface BudgetDetailSheetProps {
   categoryId: number | null;
   from: string;
   to: string;
+  subscriptionFilter: "all" | "subscriptions" | "regular";
   onClose: () => void;
 }
 
@@ -105,14 +106,15 @@ export function BudgetDetailSheet({
   categoryId,
   from,
   to,
+  subscriptionFilter,
   onClose,
 }: BudgetDetailSheetProps) {
   const open = categoryId !== null;
 
   const detailQuery = useQuery({
     enabled: open && categoryId !== null,
-    queryKey: ["category-detail", categoryId, from, to],
-    queryFn: () => getCategoryDetail(categoryId as number, { from, to }),
+    queryKey: ["category-detail", categoryId, from, to, subscriptionFilter],
+    queryFn: () => getCategoryDetail(categoryId as number, { from, to, subscriptionFilter }),
   });
 
   return (
@@ -151,7 +153,6 @@ function DetailContent({ data }: { data: CategoryDetail }) {
   const t = useTranslations("budgetDetailSheet");
   const tCat = useTranslations("categoriesSeeded");
   const queryClient = useQueryClient();
-  const [transactionFilter, setTransactionFilter] = useState<"all" | "subscriptions" | "regular">("all");
   const sameKindCategoriesQuery = useQuery({
     queryKey: ["categories", data.category.kind],
     queryFn: () => getCategories(data.category.kind),
@@ -201,13 +202,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
     [data.dailySpend]
   );
 
-  const filteredTransactions = useMemo(() => {
-    return data.transactions.filter((txn) => {
-      if (transactionFilter === "subscriptions") return txn.subscriptionId !== null;
-      if (transactionFilter === "regular") return txn.subscriptionId === null;
-      return true;
-    });
-  }, [data.transactions, transactionFilter]);
+  const filteredTransactions = data.transactions;
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
@@ -228,7 +223,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                 : t("expenseCategory")}
             </div>
             <SheetTitle className="truncate font-serif text-2xl font-normal">
-              {translateCategoryName(data.category.name, tCat, data.category.localName)}
+              {translateCategoryName(data.category.name, tCat, undefined)}
             </SheetTitle>
           </div>
           {data.category.kind !== "income" && (
@@ -409,16 +404,7 @@ function DetailContent({ data }: { data: CategoryDetail }) {
               {t("transactions")} · {filteredTransactions.length}
             </h3>
             <div className="flex items-center gap-2">
-              <Select value={transactionFilter} onValueChange={(v: any) => setTransactionFilter(v)}>
-                <SelectTrigger className="h-7 w-[140px] text-xs bg-transparent border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("filterAll")}</SelectItem>
-                  <SelectItem value="subscriptions">{t("filterSubscriptions")}</SelectItem>
-                  <SelectItem value="regular">{t("filterRegular")}</SelectItem>
-                </SelectContent>
-              </Select>
+
               <Button
                 size="sm"
                 variant="ghost"

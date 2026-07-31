@@ -269,16 +269,23 @@ export function deleteExcludedMerchantRule(id: number) {
   });
 }
 
-export function getSummary(params: {
+export async function getSummary({
+  from,
+  to,
+  months = 12,
+  subscriptionFilter = "all",
+}: {
   from: string;
   to: string;
   months?: number;
-}) {
+  subscriptionFilter?: "all" | "subscriptions" | "regular";
+}): Promise<DashboardSummary> {
   const searchParams = new URLSearchParams({
-    from: params.from,
-    to: params.to,
+    from,
+    to,
+    months: months.toString(),
+    subscriptionFilter,
   });
-  if (params.months) searchParams.set("months", String(params.months));
   return fetchJSON<DashboardSummary>(`/api/summary?${searchParams}`);
 }
 
@@ -348,11 +355,19 @@ export interface CategoryDetail {
 }
 
 export function getCategoryDetail(
-  id: number,
-  params: { from: string; to: string }
+  categoryId: number,
+  params: {
+    from: string;
+    to: string;
+    subscriptionFilter?: "all" | "subscriptions" | "regular";
+  }
 ) {
-  const sp = new URLSearchParams({ from: params.from, to: params.to });
-  return fetchJSON<CategoryDetail>(`/api/categories/${id}/detail?${sp}`);
+  const search = new URLSearchParams({
+    from: params.from,
+    to: params.to,
+    subscriptionFilter: params.subscriptionFilter || "all",
+  });
+  return fetchJSON<CategoryDetail>(`/api/categories/${categoryId}/detail?${search}`);
 }
 
 export function getBudgets() {

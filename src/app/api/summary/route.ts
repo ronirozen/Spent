@@ -44,6 +44,7 @@ export async function GET(request: Request) {
   const from = searchParams.get("from") ?? defaultFrom;
   const to = searchParams.get("to") ?? defaultTo;
   const months = Number(searchParams.get("months") ?? "12");
+  const subscriptionFilter = (searchParams.get("subscriptionFilter") as "all" | "subscriptions" | "regular") || "all";
 
   const fromDate = parseISODate(from);
   const monthLabel = fromDate.toLocaleDateString("en-US", { month: "long" });
@@ -65,11 +66,11 @@ export async function GET(request: Request) {
   const prevTo = toLocalISODate(prevMonthEnd);
 
   const categories = getAllCategories(workspaceId, "expense");
-  const currentSpend = getCategorySpendInRange(workspaceId, from, to);
-  const prevSpend = getCategorySpendInRange(workspaceId, prevFrom, prevTo);
-  const topMerchants = getTopMerchantPerCategory(workspaceId, from, to);
+  const currentSpend = getCategorySpendInRange(workspaceId, from, to, subscriptionFilter);
+  const prevSpend = getCategorySpendInRange(workspaceId, prevFrom, prevTo, subscriptionFilter);
+  const topMerchants = getTopMerchantPerCategory(workspaceId, from, to, subscriptionFilter);
   const explicitBudgets = getAllBudgets(workspaceId);
-  const needsReviewCounts = getNeedsReviewCountByCategory(workspaceId, from, to);
+  const needsReviewCounts = getNeedsReviewCountByCategory(workspaceId, from, to, subscriptionFilter);
   const needsReviewMap = new Map(
     needsReviewCounts.map((r) => [r.categoryId, r.count])
   );
@@ -120,6 +121,7 @@ export async function GET(request: Request) {
         isParent: false,
         budgetSource: "leaf" satisfies BudgetSource,
         categoryName: cat.name,
+        categoryLocalName: cat.localName,
         categoryColor: cat.color,
         categoryIcon: cat.icon,
         budgetMode: cat.budgetMode,
@@ -156,6 +158,7 @@ export async function GET(request: Request) {
       isParent: false,
       budgetSource: "leaf" satisfies BudgetSource,
       categoryName: cat.name,
+      categoryLocalName: cat.localName,
       categoryColor: cat.color,
       categoryIcon: cat.icon,
       budgetMode: cat.budgetMode,
@@ -250,6 +253,7 @@ export async function GET(request: Request) {
       budgetSource,
       childCount: kids.length,
       categoryName: parent.name,
+      categoryLocalName: parent.localName,
       categoryColor: parent.color,
       categoryIcon: parent.icon,
       budgetMode: parent.budgetMode,
@@ -270,8 +274,8 @@ export async function GET(request: Request) {
 
   const categoriesWithData: CategoryWithData[] = [...parentRows, ...leafRows];
 
-  const periodTotal = getPeriodTotal(workspaceId, from, to);
-  const transactionCount = getPeriodCount(workspaceId, from, to);
+  const periodTotal = getPeriodTotal(workspaceId, from, to, subscriptionFilter);
+  const transactionCount = getPeriodCount(workspaceId, from, to, subscriptionFilter);
 
   // Hero total comes from the workspace-level monthly target. ALL spend
   // counts against it — tracking-mode is a per-category organizational tag
@@ -314,9 +318,9 @@ export async function GET(request: Request) {
   return NextResponse.json({
     periodTotal,
     transactionCount,
-    monthlySpend: getMonthlySummary(workspaceId, months),
-    topMerchants: getTopMerchants(workspaceId, from, to),
-    categoryBreakdown: getCategoryBreakdown(workspaceId, from, to),
+    monthlySpend: getMonthlySummary(workspaceId, months, subscriptionFilter),
+    topMerchants: getTopMerchants(workspaceId, from, to, undefined, subscriptionFilter),
+    categoryBreakdown: getCategoryBreakdown(workspaceId, from, to, subscriptionFilter),
     // New fields for the budgets dashboard:
     categoriesWithData,
     totalBudget,

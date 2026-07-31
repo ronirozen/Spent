@@ -13,6 +13,13 @@ import { SyncButton } from "./sync-button";
 import { CategorizeButton } from "./categorize-button";
 import { AINotConnectedBanner } from "@/components/ai-not-connected-banner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { CategoryViewMode } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
@@ -33,6 +40,7 @@ export function Dashboard() {
   const locale = useLocale() as Locale;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<CategoryViewMode>("collapsed");
+  const [subscriptionFilter, setSubscriptionFilter] = useState<"all" | "subscriptions" | "regular">("all");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -51,8 +59,8 @@ export function Dashboard() {
   const { from, to } = getMonthRange(selectedDate);
 
   const summaryQuery = useQuery({
-    queryKey: ["summary", from, to],
-    queryFn: () => getSummary({ from, to }),
+    queryKey: ["summary", from, to, subscriptionFilter],
+    queryFn: () => getSummary({ from, to, subscriptionFilter }),
   });
 
   const handleSyncComplete = useCallback(() => {
@@ -71,6 +79,20 @@ export function Dashboard() {
         meta={monthLabel}
         actions={
           <>
+            <Select value={subscriptionFilter} onValueChange={(v: any) => setSubscriptionFilter(v)}>
+              <SelectTrigger className="h-8 w-[140px] text-xs bg-card border-border">
+                <SelectValue>
+                  {subscriptionFilter === "all" && t("filterAll")}
+                  {subscriptionFilter === "subscriptions" && t("filterSubscriptions")}
+                  {subscriptionFilter === "regular" && t("filterRegular")}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("filterAll")}</SelectItem>
+                <SelectItem value="subscriptions">{t("filterSubscriptions")}</SelectItem>
+                <SelectItem value="regular">{t("filterRegular")}</SelectItem>
+              </SelectContent>
+            </Select>
             <PeriodSelector
               label={monthLabel}
               onPrev={() => setSelectedDate((d) => addMonths(d, -1))}
@@ -111,6 +133,7 @@ export function Dashboard() {
           from={from}
           to={to}
           viewMode={viewMode}
+          subscriptionFilter={subscriptionFilter}
         />
       </div>
     </>

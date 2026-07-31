@@ -4,6 +4,7 @@ import {
   setTransactionKind,
   setTransactionNeedsReview,
   getTransactionContext,
+  setTransactionSubscriptionId,
 } from "@/server/db/queries/transactions";
 import { recordMerchantCategory } from "@/server/lib/merchant-memory";
 import { recordCorrection } from "@/server/db/queries/category-corrections";
@@ -74,6 +75,7 @@ export async function PATCH(
   const body = (await request.json().catch(() => ({}))) as {
     kind?: unknown;
     approve?: unknown;
+    subscriptionId?: number | null;
   };
 
   const numericId = Number(id);
@@ -104,6 +106,11 @@ export async function PATCH(
         );
       }
     }
+    return NextResponse.json({ success: true });
+  }
+
+  if (body.subscriptionId !== undefined) {
+    setTransactionSubscriptionId(workspaceId, numericId, body.subscriptionId);
     return NextResponse.json({ success: true });
   }
 
