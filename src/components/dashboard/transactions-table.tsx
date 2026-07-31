@@ -37,6 +37,7 @@ import {
   Tags,
   EyeOff,
   Eye,
+  CreditCard,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatCurrency, formatDate } from "@/lib/formatters";
@@ -573,6 +574,12 @@ export function TransactionsTable({
                               })}
                             </div>
                           )}
+                        {txn.accountNumber && (
+                          <div className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground/75 font-medium">
+                            <CreditCard className="h-3 w-3" />
+                            {txn.accountLabel ? `${txn.accountLabel} (***${txn.accountNumber})` : `***${txn.accountNumber}`}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
