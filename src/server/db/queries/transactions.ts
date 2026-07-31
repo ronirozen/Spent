@@ -873,6 +873,8 @@ export function getNeedsReviewCountByCategory(
   to: string,
   filter?: "all" | "subscriptions" | "regular"
 ): NeedsReviewCount[] {
+  const subSql = filter === "subscriptions" ? " AND subscription_id IS NOT NULL" : filter === "regular" ? " AND subscription_id IS NULL" : "";
+
   return getDb()
     .prepare(
       `SELECT category_id as categoryId, COUNT(*) as count
