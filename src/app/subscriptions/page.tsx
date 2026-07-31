@@ -40,7 +40,8 @@ export default async function SubscriptionsPage() {
   return (
     <AppShell>
       <PageHeader 
-        title={t("pageTitle")} 
+        title={t("pageTitle")}
+        meta={new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date())}
         actions={<SyncButton />}
       />
       <div className="p-4 md:p-6 lg:p-8 space-y-6">
