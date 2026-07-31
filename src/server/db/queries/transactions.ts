@@ -358,7 +358,7 @@ export function getMonthlySummary(
          AND date >= date('now', '-' || ? || ' months')
          AND status = 'completed'
          AND kind = 'expense'
-         AND is_excluded = 0
+         AND is_excluded = 0${subSql}
        GROUP BY month
        ORDER BY month ASC`
     )
@@ -383,7 +383,7 @@ export function getTopMerchants(
               COUNT(*) as count
        FROM transactions
        WHERE workspace_id = ? AND date >= ? AND date <= ? AND status = 'completed' AND kind = 'expense'
-         AND is_excluded = 0
+         AND is_excluded = 0${subSql}
        GROUP BY description
        ORDER BY amount DESC
        LIMIT ?`
@@ -412,7 +412,7 @@ export function getCategoryBreakdown(
        FROM transactions t
        LEFT JOIN categories c ON t.category_id = c.id
        WHERE t.workspace_id = ? AND t.date >= ? AND t.date <= ? AND t.status = 'completed' AND t.kind = 'expense'
-         AND t.is_excluded = 0
+         AND t.is_excluded = 0${subSql}
        GROUP BY t.category_id
        ORDER BY amount DESC`
     )
@@ -442,7 +442,7 @@ export function getCategorySpendInRange(
               COUNT(*) as count
        FROM transactions
        WHERE workspace_id = ? AND date >= ? AND date <= ? AND status = 'completed' AND kind = 'expense' AND category_id IS NOT NULL
-         AND is_excluded = 0
+         AND is_excluded = 0${subSql}
        GROUP BY category_id`
     )
     .all(workspaceId, from, to) as CategorySpend[];
@@ -472,7 +472,7 @@ export function getTopMerchantPerCategory(
                 ROW_NUMBER() OVER (PARTITION BY category_id ORDER BY SUM(ABS(charged_amount)) DESC) as rn
          FROM transactions
          WHERE workspace_id = ? AND date >= ? AND date <= ? AND status = 'completed' AND kind = 'expense' AND category_id IS NOT NULL
-           AND is_excluded = 0
+           AND is_excluded = 0${subSql}
          GROUP BY category_id, description
        )
        WHERE rn = 1`
@@ -512,7 +512,7 @@ export function getCategorySpendByDay(
          AND t.category_id = ?
          AND t.kind = 'expense'
          AND t.status = 'completed'
-         AND t.is_excluded = 0
+         AND t.is_excluded = 0${subSql}
        GROUP BY days.d
        ORDER BY days.d ASC`
     )
@@ -547,7 +547,7 @@ export function getTopMerchantsForCategory(
          AND date >= ? AND date <= ?
          AND status = 'completed'
          AND kind = 'expense'
-         AND is_excluded = 0
+         AND is_excluded = 0${subSql}
        GROUP BY description
        ORDER BY amount DESC
        LIMIT ?`
@@ -570,7 +570,7 @@ export function getPeriodTotal(
       `SELECT COALESCE(SUM(ABS(charged_amount)), 0) as total
        FROM transactions
        WHERE workspace_id = ? AND date >= ? AND date <= ? AND status = 'completed' AND kind = 'expense'
-         AND is_excluded = 0`
+         AND is_excluded = 0${subSql}`
     )
     .get(workspaceId, from, to) as { total: number };
   return row.total;
@@ -591,7 +591,7 @@ export function getPeriodCount(
       `SELECT COUNT(*) as count
        FROM transactions
        WHERE workspace_id = ? AND date >= ? AND date <= ? AND status = 'completed' AND kind = 'expense'
-         AND is_excluded = 0`
+         AND is_excluded = 0${subSql}`
     )
     .get(workspaceId, from, to) as { count: number };
   return row.count;
@@ -882,6 +882,7 @@ export function getNeedsReviewCountByCategory(
          AND kind = 'expense'
          AND needs_review = 1
          AND category_id IS NOT NULL
+       ${subSql}
        GROUP BY category_id`
     )
     .all(workspaceId, from, to) as NeedsReviewCount[];
