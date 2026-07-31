@@ -30,7 +30,7 @@ export function PageHeader({
 }) {
   return (
     <header className="sticky top-0 z-10 border-b border-border/40 bg-background/80 backdrop-blur">
-      <div className="flex h-14 items-center justify-between gap-4 px-4 md:h-16 md:px-6 lg:px-8">
+      <div className="flex min-h-14 flex-wrap items-center justify-between gap-4 py-2 px-4 md:min-h-16 md:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <SidebarTrigger className="-ms-1 md:hidden" />
           <h1 className="truncate font-serif text-2xl leading-none tracking-tight">
@@ -45,7 +45,7 @@ export function PageHeader({
             </>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {actions}
           <NotificationCenter />
         </div>
