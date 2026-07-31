@@ -84,7 +84,10 @@
     "statusStale": "Stale",
     "statusError": "Error",
     "statusNeverSynced": "Never synced",
-    "lastAttemptFailed": "Last attempt failed"
+    "lastAttemptFailed": "Last attempt failed",
+    "filterAll": "All",
+    "filterSubscriptions": "Subscriptions",
+    "filterRegular": "Regular"
   },
   "syncPill": {
     "noBanksConnected": "No banks connected",

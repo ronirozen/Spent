@@ -84,7 +84,10 @@
     "statusStale": "ישן",
     "statusError": "שגיאה",
     "statusNeverSynced": "לא סונכרן",
-    "lastAttemptFailed": "הניסיון האחרון נכשל"
+    "lastAttemptFailed": "הניסיון האחרון נכשל",
+    "filterAll": "הכל",
+    "filterSubscriptions": "מנויים",
+    "filterRegular": "רגילים"
   },
   "syncPill": {
     "noBanksConnected": "לא חוברו בנקים",
