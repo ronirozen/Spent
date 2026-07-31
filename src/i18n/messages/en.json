@@ -205,6 +205,8 @@
     "markAsIncome": "Mark as income",
     "markAsExpense": "Mark as expense",
     "markAsTransfer": "Mark as transfer",
+    "markAsSubscription": "Mark as subscription",
+    "subscriptionAddedToast": "Added as subscription",
     "excludeAction": "Exclude this transaction",
     "excludeMerchantAction": "Always exclude this merchant",
     "includeAction": "Include in totals",
