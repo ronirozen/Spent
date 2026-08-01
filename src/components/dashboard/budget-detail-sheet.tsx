@@ -426,7 +426,10 @@ function DetailContent({ data }: { data: CategoryDetail }) {
                 {filteredTransactions.map((txn) => (
                   <li
                     key={txn.id}
-                    className="flex items-center justify-between gap-3 px-4 py-2.5"
+                    className={cn(
+                      "flex items-center justify-between gap-3 px-4 py-2.5",
+                      txn.isExcluded && "opacity-50"
+                    )}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="break-words text-sm font-medium">

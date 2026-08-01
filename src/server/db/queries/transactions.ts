@@ -158,6 +158,7 @@ interface QueryParams {
   credentialId?: number;
   credentialIds?: number[];
   subscriptionFilter?: "all" | "subscriptions" | "regular";
+  isExcluded?: boolean;
 }
 
 function appendCredentialIdsFilter(
@@ -242,6 +243,10 @@ export function queryTransactions(
     conditions.push("t.subscription_id IS NOT NULL");
   } else if (params.subscriptionFilter === "regular") {
     conditions.push("t.subscription_id IS NULL");
+  }
+
+  if (params.isExcluded !== undefined) {
+    conditions.push(params.isExcluded ? "t.is_excluded = 1" : "t.is_excluded = 0");
   }
 
   const where = `WHERE ${conditions.join(" AND ")}`;

@@ -164,6 +164,7 @@ export async function GET(
       order: "desc",
       limit: 50,
       subscriptionFilter,
+      isExcluded: false,
     }
   );
 
