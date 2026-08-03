@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { getSummary } from "@/lib/api";
-import { getMonthRange, formatMonthLabel, addMonths } from "@/lib/formatters";
+import { formatMonthLabel } from "@/lib/formatters";
+import { useSelectedMonth } from "@/lib/month-store";
 import { PageHeader } from "@/components/layout/app-shell";
 import { HeroCard } from "./hero-card";
 import { CategoryGrid } from "./category-grid";
@@ -24,39 +25,44 @@ import type { CategoryViewMode } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
 const VIEW_MODE_KEY = "spent.dashboard.viewMode";
-
-function readViewMode(): CategoryViewMode {
-  if (typeof window === "undefined") return "collapsed";
+let memViewMode: CategoryViewMode = "collapsed";
+if (typeof window !== "undefined") {
   try {
     const raw = window.localStorage.getItem(VIEW_MODE_KEY);
-    return raw === "expanded" ? "expanded" : "collapsed";
+    if (raw === "expanded" || raw === "collapsed") memViewMode = raw;
   } catch {
-    return "collapsed";
+    // ignore
   }
+}
+const viewModeListeners = new Set<() => void>();
+function subscribeViewMode(fn: () => void) {
+  viewModeListeners.add(fn);
+  return () => {
+    viewModeListeners.delete(fn);
+  };
 }
 
 export function Dashboard() {
   const t = useTranslations("dashboard");
   const locale = useLocale() as Locale;
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<CategoryViewMode>("collapsed");
+  const { selectedDate, from, to, goToPrevMonth, goToNextMonth } = useSelectedMonth();
+  const viewMode = useSyncExternalStore(
+    subscribeViewMode,
+    () => memViewMode,
+    () => "collapsed"
+  );
   const [subscriptionFilter, setSubscriptionFilter] = useState<"all" | "subscriptions" | "regular">("all");
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setViewMode(readViewMode());
-  }, []);
-
   const handleViewModeChange = useCallback((mode: CategoryViewMode) => {
-    setViewMode(mode);
+    memViewMode = mode;
     try {
       window.localStorage.setItem(VIEW_MODE_KEY, mode);
     } catch {
       // Storage may be unavailable; in-memory state still works.
     }
+    viewModeListeners.forEach((l) => l());
   }, []);
-
-  const { from, to } = getMonthRange(selectedDate);
 
   const summaryQuery = useQuery({
     queryKey: ["summary", from, to, subscriptionFilter],
@@ -79,7 +85,7 @@ export function Dashboard() {
         meta={monthLabel}
         actions={
           <>
-            <Select value={subscriptionFilter} onValueChange={(v: any) => setSubscriptionFilter(v)}>
+            <Select value={subscriptionFilter} onValueChange={(v) => setSubscriptionFilter((v || "all") as "all" | "subscriptions" | "regular")}>
               <SelectTrigger className="h-8 w-[140px] text-xs bg-card border-border">
                 <SelectValue>
                   {subscriptionFilter === "all" && t("filterAll")}
@@ -95,8 +101,8 @@ export function Dashboard() {
             </Select>
             <PeriodSelector
               label={monthLabel}
-              onPrev={() => setSelectedDate((d) => addMonths(d, -1))}
-              onNext={() => setSelectedDate((d) => addMonths(d, 1))}
+              onPrev={goToPrevMonth}
+              onNext={goToNextMonth}
             />
             <CategorizeButton onApplied={handleSyncComplete} />
             <SyncButton onComplete={handleSyncComplete} />

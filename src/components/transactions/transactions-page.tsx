@@ -22,17 +22,14 @@ import {
   type SortOrder,
   type TransactionSortField,
 } from "@/lib/transaction-sort";
-import {
-  addMonths,
-  formatMonthLabel,
-  getMonthRange,
-} from "@/lib/formatters";
+import { formatMonthLabel } from "@/lib/formatters";
+import { useSelectedMonth } from "@/lib/month-store";
 import type { Locale } from "@/i18n/routing";
 
 export function TransactionsPage() {
   const t = useTranslations("transactions");
   const locale = useLocale() as Locale;
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { selectedDate, from, to, goToPrevMonth, goToNextMonth } = useSelectedMonth();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<number[]>([]);
   const [accountFilter, setAccountFilter] = useState<number[]>([]);
@@ -46,8 +43,6 @@ export function TransactionsPage() {
     { value: "income", label: t("filterIncome") },
     { value: "expense", label: t("filterExpenses") },
   ];
-
-  const { from, to } = getMonthRange(selectedDate);
 
   const allCategoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -119,8 +114,8 @@ export function TransactionsPage() {
         actions={
           <PeriodSelector
             label={monthLabel}
-            onPrev={() => setSelectedDate((d) => addMonths(d, -1))}
-            onNext={() => setSelectedDate((d) => addMonths(d, 1))}
+            onPrev={goToPrevMonth}
+            onNext={goToNextMonth}
           />
         }
       />

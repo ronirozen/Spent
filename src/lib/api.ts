@@ -313,6 +313,7 @@ export function updateTransactionCategory(id: number, categoryId: number) {
 export interface CategoryChildBreakdown {
   id: number;
   name: string;
+  localName?: string | null;
   color: string;
   icon: string | null;
   spent: number;

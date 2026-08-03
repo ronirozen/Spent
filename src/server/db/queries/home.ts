@@ -217,13 +217,14 @@ export function getCategorySnapshot(
 
   const categories = db
     .prepare(
-      `SELECT id, parent_id as parentId, name, color
+      `SELECT id, parent_id as parentId, name, local_name as localName, color
        FROM categories WHERE workspace_id = ? AND kind = 'expense'`
     )
     .all(workspaceId) as Array<{
     id: number;
     parentId: number | null;
     name: string;
+    localName: string | null;
     color: string;
   }>;
 
@@ -292,6 +293,7 @@ export function getCategorySnapshot(
     items.push({
       categoryId: key,
       name: cat.name,
+      localName: cat.localName ?? null,
       color: cat.color,
       spent,
       budget,

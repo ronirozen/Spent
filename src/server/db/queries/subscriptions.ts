@@ -115,7 +115,7 @@ export function getSubscriptionAlerts(workspaceId: number, includeDismissed = fa
     JOIN subscriptions s ON a.subscription_id = s.id
     WHERE a.workspace_id = ? ${includeDismissed ? '' : 'AND a.is_dismissed = 0'}
     ORDER BY a.created_at DESC
-  `).all(workspaceId) as (SubscriptionAlert & { isDismissed: number })[];
+  `).all(workspaceId) as (Omit<SubscriptionAlert, "isDismissed"> & { isDismissed: number })[];
   
   return rows.map(r => ({
     ...r,

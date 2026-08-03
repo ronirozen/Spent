@@ -60,9 +60,7 @@ export function formatMonthLabel(date: Date, locale?: Locale): string {
 }
 
 export function addMonths(date: Date, months: number): Date {
-  const result = new Date(date);
-  result.setMonth(result.getMonth() + months);
-  return result;
+  return new Date(date.getFullYear(), date.getMonth() + months, 1);
 }
 
 export interface FormatLastSyncLabels {

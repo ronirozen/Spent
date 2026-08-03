@@ -73,13 +73,11 @@ export function NotificationCenter() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {alerts.length > 0 && (
-            <span className="absolute right-2 top-2 flex h-2 w-2 items-center justify-center rounded-full bg-destructive" />
-          )}
-        </Button>
+      <DropdownMenuTrigger className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+        <Bell className="h-5 w-5" />
+        {alerts.length > 0 && (
+          <span className="absolute right-2 top-2 flex h-2 w-2 items-center justify-center rounded-full bg-destructive" />
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 max-w-[90vw] p-0">
         <div className="flex items-center justify-between border-b px-4 py-3">

@@ -201,6 +201,7 @@ export async function GET(
           return {
             id: c.id,
             name: c.name,
+            localName: c.localName ?? null,
             color: c.color,
             icon: c.icon,
             spent: childSpent,

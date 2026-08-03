@@ -12,7 +12,7 @@ import {
 } from "./sync-progress-dialog";
 
 interface SyncButtonProps {
-  onComplete: () => void;
+  onComplete?: () => void;
   autoStart?: boolean;
 }
 
@@ -147,7 +147,7 @@ export function SyncButton({ onComplete, autoStart = false }: SyncButtonProps) {
             closeButton: true,
           });
         }
-        onComplete();
+        onComplete?.();
       } else if (event.type === "error") {
         const message = event.data.message as string;
         setSyncing(false);
