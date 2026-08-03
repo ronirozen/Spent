@@ -731,3 +731,100 @@ export interface ExcludedMerchant {
   merchantKey: string;
   createdAt: string;
 }
+
+export type InstallmentPlanStatus = "active" | "last_payment" | "ending_soon" | "completed";
+
+export interface PaymentPlanTransaction {
+  id: number;
+  date: string;
+  processedDate: string | null;
+  chargedAmount: number;
+  chargedCurrency: string | null;
+  installmentNumber: number | null;
+  installmentTotal: number | null;
+  description: string;
+  memo: string | null;
+}
+
+export interface PaymentPlan {
+  id: string;
+  merchantName: string;
+  rawDescription: string;
+  accountNumber: string;
+  accountLabel?: string | null;
+  provider: string;
+  categoryId: number | null;
+  categoryName: string | null;
+  categoryLocalName: string | null;
+  categoryColor: string | null;
+  categoryIcon: string | null;
+  installmentTotal: number;
+  latestInstallmentNumber: number;
+  monthlyAmount: number;
+  totalPlanAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  remainingInstallments: number;
+  startDate: string;
+  latestDate: string;
+  expectedEndDate: string;
+  status: InstallmentPlanStatus;
+  transactions: PaymentPlanTransaction[];
+}
+
+export interface InstallmentMonthlyForecast {
+  monthKey: string;
+  monthLabel: string;
+  committedAmount: number;
+  freedAmount: number;
+  activePlansCount: number;
+  endingPlansCount: number;
+  endingPlans: Array<{
+    id: string;
+    merchantName: string;
+    monthlyAmount: number;
+  }>;
+}
+
+export interface InstallmentsOverview {
+  summary: {
+    monthlyBurden: number;
+    totalRemainingBalance: number;
+    freeingUpNextMonth: number;
+    freeingUpIn3Months?: number;
+    payoffDate: string | null;
+    monthsToPayoff: number;
+    activePlansCount: number;
+    endingSoonCount: number;
+    completedPlansCount: number;
+  };
+  plans: PaymentPlan[];
+  forecast: InstallmentMonthlyForecast[];
+}
+
+export type AppAlert =
+  | {
+      id: number;
+      type: "price_hike";
+      workspaceId: number;
+      subscriptionId: number;
+      transactionId: number;
+      subscriptionName: string;
+      previousAmount: number;
+      newAmount: number;
+      isDismissed: boolean;
+      createdAt: string;
+    }
+  | {
+      id: number;
+      type: "last_payment";
+      workspaceId: number;
+      transactionId: number;
+      merchantName: string;
+      installmentNumber: number;
+      installmentTotal: number;
+      freedAmount: number;
+      isDismissed: boolean;
+      createdAt: string;
+    };
+

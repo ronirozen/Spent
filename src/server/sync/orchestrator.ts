@@ -28,6 +28,7 @@ import {
 import { applyMerchantRulesToSyncRun } from "@/server/db/queries/excluded-merchants";
 import { getAllCategories } from "@/server/db/queries/categories";
 import { getRecentCorrections } from "@/server/db/queries/category-corrections";
+import { extractInstallments } from "@/server/lib/installments-extractor";
 import { scrapeBank } from "@/server/scrapers";
 import {
   scrapeOneZeroFirstTime,
@@ -248,12 +249,21 @@ async function syncOneCredential(
   }
 
   const allTransactions = result.accounts.flatMap((account) =>
-    account.transactions.map((txn) => ({
-      accountNumber: account.accountNumber,
-      ...txn,
-      installmentNumber: txn.installments?.number,
-      installmentTotal: txn.installments?.total,
-    }))
+    account.transactions.map((txn) => {
+      const extracted = extractInstallments({
+        description: txn.description,
+        memo: txn.memo,
+        installments: txn.installments,
+        type: txn.type,
+      });
+      return {
+        accountNumber: account.accountNumber,
+        ...txn,
+        type: extracted.isInstallment ? ("installments" as const) : ("normal" as const),
+        installmentNumber: extracted.installmentNumber ?? undefined,
+        installmentTotal: extracted.installmentTotal ?? undefined,
+      };
+    })
   );
 
   const { added, updated } = insertTransactions(

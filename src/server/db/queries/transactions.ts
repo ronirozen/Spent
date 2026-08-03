@@ -3,6 +3,7 @@ import "server-only";
 import { getDb } from "../index";
 import { computeDedupHash } from "../../lib/dedup";
 import { detectKind } from "../../lib/transfers";
+import { extractInstallments } from "../../lib/installments-extractor";
 import type {
   TransactionWithCategory,
   MonthlySummary,
@@ -76,6 +77,18 @@ export function insertTransactions(
 
   const batchInsert = db.transaction(() => {
     for (const txn of transactions) {
+      const extracted = extractInstallments({
+        description: txn.description,
+        memo: txn.memo,
+        type: txn.type,
+        installmentNumber: txn.installmentNumber,
+        installmentTotal: txn.installmentTotal,
+      });
+
+      const effectiveType = extracted.isInstallment ? "installments" : txn.type;
+      const effectiveInstallmentNumber = extracted.installmentNumber ?? txn.installmentNumber ?? null;
+      const effectiveInstallmentTotal = extracted.installmentTotal ?? txn.installmentTotal ?? null;
+
       const hash = computeDedupHash({
         accountNumber: txn.accountNumber,
         date: txn.date,
@@ -83,8 +96,8 @@ export function insertTransactions(
         originalCurrency: txn.originalCurrency,
         description: txn.description,
         identifier: txn.identifier,
-        installmentNumber: txn.installmentNumber,
-        installmentTotal: txn.installmentTotal,
+        installmentNumber: effectiveInstallmentNumber,
+        installmentTotal: effectiveInstallmentTotal,
       });
 
       const batchCount = (hashCounts.get(hash) ?? 0) + 1;
@@ -108,11 +121,11 @@ export function insertTransactions(
         chargedCurrency: txn.chargedCurrency ?? null,
         description: txn.description,
         memo: txn.memo ?? null,
-        type: txn.type,
+        type: effectiveType,
         status: txn.status,
         identifier: txn.identifier != null ? String(txn.identifier) : null,
-        installmentNumber: txn.installmentNumber ?? null,
-        installmentTotal: txn.installmentTotal ?? null,
+        installmentNumber: effectiveInstallmentNumber,
+        installmentTotal: effectiveInstallmentTotal,
         provider,
         credentialId,
         syncRunId: syncRunId,

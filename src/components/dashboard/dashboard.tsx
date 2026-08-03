@@ -46,10 +46,10 @@ export function Dashboard() {
   const t = useTranslations("dashboard");
   const locale = useLocale() as Locale;
   const { selectedDate, from, to, goToPrevMonth, goToNextMonth } = useSelectedMonth();
-  const viewMode = useSyncExternalStore(
+  const viewMode: CategoryViewMode = useSyncExternalStore(
     subscribeViewMode,
     () => memViewMode,
-    () => "collapsed"
+    () => "collapsed" as CategoryViewMode
   );
   const [subscriptionFilter, setSubscriptionFilter] = useState<"all" | "subscriptions" | "regular">("all");
   const queryClient = useQueryClient();

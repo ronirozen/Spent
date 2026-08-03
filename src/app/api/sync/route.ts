@@ -1,4 +1,5 @@
 import { detectSubscriptions } from "@/server/lib/subscriptions";
+import { detectInstallmentAlerts } from "@/server/lib/installments-alerts";
 import {
   runAllWorkspaces,
   syncWorkspace,
@@ -64,11 +65,13 @@ export async function POST(request: Request) {
           const summary = await syncWorkspace(workspaceId, filterCredentialId, send);
           summaries.push(summary);
           await detectSubscriptions(workspaceId);
+          await detectInstallmentAlerts(workspaceId);
         } else {
           const allSummaries = await runAllWorkspaces(filterCredentialId, send);
           summaries.push(...allSummaries);
           for (const summary of allSummaries) {
             await detectSubscriptions(summary.workspaceId);
+            await detectInstallmentAlerts(summary.workspaceId);
           }
         }
 

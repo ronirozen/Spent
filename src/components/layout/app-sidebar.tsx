@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   Star,
   RefreshCw,
+  CalendarRange,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,6 +57,12 @@ const NAV: NavDef[] = [
     labelKey: "subscriptions",
     Icon: RefreshCw,
     match: (p: string) => p.startsWith("/subscriptions"),
+  },
+  {
+    href: "/installments",
+    labelKey: "installments",
+    Icon: CalendarRange,
+    match: (p: string) => p.startsWith("/installments"),
   },
 ];
 

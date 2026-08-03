@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 import { dismissAlert } from "@/server/db/queries/subscriptions";
+import { dismissInstallmentAlert } from "@/server/lib/installments-alerts";
 
 export async function DELETE(
   request: Request,
@@ -15,7 +16,19 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid alert ID" }, { status: 400 });
     }
 
-    dismissAlert(workspaceId, alertId);
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
+
+    if (type === "last_payment") {
+      dismissInstallmentAlert(workspaceId, alertId);
+    } else if (type === "price_hike") {
+      dismissAlert(workspaceId, alertId);
+    } else {
+      // Dismiss from both to be safe
+      dismissAlert(workspaceId, alertId);
+      dismissInstallmentAlert(workspaceId, alertId);
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Failed to dismiss alert:", err);

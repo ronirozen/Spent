@@ -11,6 +11,7 @@ import type {
   Workspace,
   HomePayload,
   ActivitySnapshot,
+  InstallmentsOverview,
 } from "./types";
 import { getActiveWorkspaceIdSync } from "./workspace-store";
 
@@ -291,6 +292,10 @@ export async function getSummary({
 
 export function getHome() {
   return fetchJSON<HomePayload>(`/api/home`);
+}
+
+export function getInstallmentsOverview() {
+  return fetchJSON<InstallmentsOverview>(`/api/installments`);
 }
 
 export function getActivity() {
