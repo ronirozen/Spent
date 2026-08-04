@@ -40,7 +40,7 @@ export default async function InstallmentsPage() {
         actions={<SyncButton />}
       />
 
-      <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="p-3.5 sm:p-5 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
         {/* KPI Cards */}
         <InstallmentsKpiCards summary={overview.summary} />
 

@@ -43,7 +43,6 @@ export function InstallmentsForecastChart({ forecast }: Props) {
           const d = new Date(y, m - 1, 1);
           shortName = d.toLocaleDateString(locale === "he" ? "he-IL" : "en-US", {
             month: "short",
-            year: "2-digit",
           });
           fullName = d.toLocaleDateString(locale === "he" ? "he-IL" : "en-US", {
             month: "long",
@@ -83,25 +82,25 @@ export function InstallmentsForecastChart({ forecast }: Props) {
   const activePoint = activeMonthIdx != null ? chartData[activeMonthIdx] : chartData[0];
 
   return (
-    <div className="rounded-xl border bg-card p-5 md:p-6 shadow-sm">
+    <div className="rounded-xl border bg-card p-4 sm:p-5 md:p-6 shadow-sm">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-6">
         <div>
-          <h3 className="font-serif text-lg font-semibold tracking-tight">
+          <h3 className="font-serif text-base sm:text-lg font-semibold tracking-tight">
             {t("forecastTitle")}
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
             {t("forecastDesc")}
           </p>
         </div>
 
         {activePoint && (
-          <div className="flex flex-wrap items-center gap-3 bg-muted/40 px-3.5 py-2 rounded-lg border text-xs">
+          <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 sm:gap-3 bg-muted/40 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg border text-[11px] sm:text-xs">
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
+              <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
               <span className="font-medium text-foreground">{activePoint.fullName}</span>
             </div>
-            <div className="h-3 w-px bg-border" />
+            <div className="h-3 w-px bg-border hidden sm:block" />
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">{t("committed")}:</span>
               <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400">
@@ -110,9 +109,9 @@ export function InstallmentsForecastChart({ forecast }: Props) {
             </div>
             {activePoint.freed > 0 && (
               <>
-                <div className="h-3 w-px bg-border" />
+                <div className="h-3 w-px bg-border hidden sm:block" />
                 <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                   <span className="font-mono font-semibold">
                     +{formatCurrency(activePoint.freed, "ILS", locale)}
                   </span>
@@ -128,7 +127,7 @@ export function InstallmentsForecastChart({ forecast }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            margin={{ top: 10, right: 12, left: 10, bottom: 4 }}
+            margin={{ top: 10, right: 8, left: -14, bottom: 4 }}
             barGap={3}
             onMouseMove={(state) => {
               if (state?.activeTooltipIndex != null) {
@@ -160,18 +159,19 @@ export function InstallmentsForecastChart({ forecast }: Props) {
             <XAxis
               dataKey="shortName"
               stroke="#888888"
-              fontSize={11}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
-              dy={6}
+              interval={0}
+              dy={4}
             />
             <YAxis
               stroke="#888888"
-              fontSize={11}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
-              width={55}
-              tickFormatter={(v) => `₪${v >= 1000 ? `${Math.round(v / 1000)}k` : v}`}
+              width={42}
+              tickFormatter={(v) => (v === 0 ? "0" : `₪${v >= 1000 ? `${Math.round(v / 1000)}k` : v}`)}
             />
             <Tooltip
               cursor={{ fill: "rgba(100, 116, 139, 0.08)" }}
@@ -201,7 +201,7 @@ export function InstallmentsForecastChart({ forecast }: Props) {
                           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                           {t("freedBudget")}
                         </span>
-                        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                        <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                           +{formatCurrency(data.freed, "ILS", locale)}
                         </span>
                       </div>
@@ -245,9 +245,9 @@ export function InstallmentsForecastChart({ forecast }: Props) {
             />
             <Legend
               verticalAlign="top"
-              align="right"
+              align="center"
               content={() => (
-                <div className="flex items-center justify-end gap-5 pb-4 text-xs">
+                <div className="flex items-center justify-center sm:justify-end gap-4 sm:gap-5 pb-3 sm:pb-4 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-sm bg-indigo-500 shadow-sm shrink-0" />
                     <span className="text-muted-foreground font-medium">{t("committed")}</span>

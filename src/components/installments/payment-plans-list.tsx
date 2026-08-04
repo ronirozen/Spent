@@ -128,11 +128,11 @@ export function PaymentPlansList({ plans }: Props) {
       {/* Header Controls: Tabs & Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-lg bg-muted/60 p-1 text-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-lg bg-muted/60 p-1 text-xs no-scrollbar">
           <button
             type="button"
             onClick={() => setCurrentTab("active")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 sm:px-3 py-1.5 font-medium shrink-0 whitespace-nowrap transition-all ${
               currentTab === "active"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -150,7 +150,7 @@ export function PaymentPlansList({ plans }: Props) {
           <button
             type="button"
             onClick={() => setCurrentTab("ending_soon")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 sm:px-3 py-1.5 font-medium shrink-0 whitespace-nowrap transition-all ${
               currentTab === "ending_soon"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -168,7 +168,7 @@ export function PaymentPlansList({ plans }: Props) {
           <button
             type="button"
             onClick={() => setCurrentTab("completed")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 sm:px-3 py-1.5 font-medium shrink-0 whitespace-nowrap transition-all ${
               currentTab === "completed"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -186,7 +186,7 @@ export function PaymentPlansList({ plans }: Props) {
           <button
             type="button"
             onClick={() => setCurrentTab("all")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 sm:px-3 py-1.5 font-medium shrink-0 whitespace-nowrap transition-all ${
               currentTab === "all"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
