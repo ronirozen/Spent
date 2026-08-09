@@ -69,6 +69,7 @@ import { CategoryDropdownContent } from "@/components/transactions/category-drop
 import type { SortOrder, TransactionSortField } from "@/lib/transaction-sort";
 import { cn } from "@/lib/utils";
 import { ProviderBadge } from "@/components/setup/provider-badge";
+import { ICON_MAP } from "@/components/dashboard/category-card";
 import type {
   TransactionWithCategory,
   Category,
@@ -534,37 +535,50 @@ export function TransactionsTable({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {txn.merchantDomain ? (
-                            <>
-                              <img
-                                src={`https://www.google.com/s2/favicons?domain=${txn.merchantDomain}&sz=128`}
-                                alt={txn.description}
-                                className="h-8 w-8 shrink-0 rounded-full border border-border bg-white object-contain p-0.5"
-                                onLoad={(e) => {
-                                  if (e.currentTarget.naturalWidth <= 16 && e.currentTarget.naturalHeight <= 16) {
-                                    e.currentTarget.style.display = 'none';
-                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                                    if (fallback) fallback.style.display = 'flex';
-                                  }
-                                }}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                                  if (fallback) fallback.style.display = 'flex';
-                                }}
-                              />
+                          {(() => {
+                            const FallbackIcon = ICON_MAP[txn.categoryIcon ?? "circle-dot"] ?? ICON_MAP["circle-dot"];
+                            const fallbackBg = txn.categoryColor ? `color-mix(in oklch, ${txn.categoryColor} 18%, transparent)` : "var(--accent)";
+                            const fallbackColor = txn.categoryColor ? `color-mix(in oklch, ${txn.categoryColor} 80%, black)` : "var(--muted-foreground)";
+
+                            if (txn.merchantDomain) {
+                              return (
+                                <>
+                                  <img
+                                    src={`https://www.google.com/s2/favicons?domain=${txn.merchantDomain}&sz=128`}
+                                    alt={txn.description}
+                                    className="h-8 w-8 shrink-0 rounded-full border border-border bg-white object-contain p-0.5"
+                                    onLoad={(e) => {
+                                      if (e.currentTarget.naturalWidth <= 16 && e.currentTarget.naturalHeight <= 16) {
+                                        e.currentTarget.style.display = 'none';
+                                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                        if (fallback) fallback.style.display = 'flex';
+                                      }
+                                    }}
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                      if (fallback) fallback.style.display = 'flex';
+                                    }}
+                                  />
+                                  <div 
+                                    className="h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border"
+                                    style={{ display: 'none', backgroundColor: fallbackBg, color: fallbackColor }}
+                                  >
+                                    <FallbackIcon className="h-4 w-4" />
+                                  </div>
+                                </>
+                              );
+                            }
+
+                            return (
                               <div 
-                                className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium text-muted-foreground border border-border"
-                                style={{ display: 'none' }}
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border"
+                                style={{ backgroundColor: fallbackBg, color: fallbackColor }}
                               >
-                                {txn.description.charAt(0).toUpperCase()}
+                                <FallbackIcon className="h-4 w-4" />
                               </div>
-                            </>
-                          ) : (
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium text-muted-foreground border border-border">
-                              {txn.description.charAt(0).toUpperCase()}
-                            </div>
-                          )}
+                            );
+                          })()}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <div className="truncate font-medium" title={txn.originalDescription !== txn.description ? txn.originalDescription : undefined}>

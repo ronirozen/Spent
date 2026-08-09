@@ -33,7 +33,7 @@ import { translateCategoryName } from "@/lib/i18n-data";
 import type { CategoryWithData, BudgetStatus } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
-const ICON_MAP: Record<string, LucideIcon> = {
+export const ICON_MAP: Record<string, LucideIcon> = {
   "shopping-basket": ShoppingBasket,
   "utensils-crossed": UtensilsCrossed,
   "tram-front": TramFront,

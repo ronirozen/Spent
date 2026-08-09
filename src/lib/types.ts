@@ -43,6 +43,7 @@ export interface TransactionWithCategory extends Transaction {
   categoryName: string | null;
   categoryLocalName: string | null;
   categoryColor: string | null;
+  categoryIcon: string | null;
   isExcluded: boolean;
 }
 
