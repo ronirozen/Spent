@@ -12,7 +12,7 @@ async function run() {
     });
 
     console.log("Connected. Deploying latest changes...");
-    const res = await ssh.execCommand('cd /DATA/AppData/spent && git fetch origin main && git reset --hard origin/main && docker compose build spent && docker compose up -d spent');
+    const res = await ssh.execCommand('cd /DATA/AppData/spent && git fetch origin main && git reset --hard origin/main && docker compose build spent && docker rm -f spent && docker compose up -d spent');
     
     console.log("OUTPUT:\n", res.stdout);
     if (res.stderr) console.error("STDERR:", res.stderr);
