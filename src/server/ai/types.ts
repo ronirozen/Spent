@@ -12,6 +12,10 @@ export interface CategoryMapping {
   confidence?: AIConfidence;
   /** True when the AI identifies this transaction as a subscription. */
   isSubscription?: boolean;
+  /** Normalized, clean name for the merchant */
+  normalizedName?: string;
+  /** The website domain of the merchant for fetching logos */
+  merchantDomain?: string;
 }
 
 export interface TransactionForCategorization {

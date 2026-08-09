@@ -16,6 +16,8 @@ export interface Transaction {
   chargedAmount: number;
   chargedCurrency: string | null;
   description: string;
+  originalDescription: string;
+  merchantDomain: string | null;
   memo: string | null;
   type: "normal" | "installments";
   status: "completed" | "pending";
@@ -725,10 +727,13 @@ export const BANK_PROVIDERS: BankProviderInfo[] = [
   },
 ];
 
-export interface ExcludedMerchant {
+export interface MerchantRule {
   id: number;
-  provider: string;
+  provider: string | null;
   merchantKey: string;
+  matchType: "exact" | "contains" | "starts_with";
+  action: "exclude" | "normalize";
+  normalizedName: string | null;
   createdAt: string;
 }
 

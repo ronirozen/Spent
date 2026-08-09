@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import { runMigrations } from "./migrate";
 import { backfillExistingInstallments } from "../lib/installments-extractor";
+import { backfillDedupHashes } from "../lib/fixup-dedup-hashes";
 
 const DB_DIR = process.env.SPENT_DATA_DIR
   ? path.resolve(process.env.SPENT_DATA_DIR)
@@ -23,6 +24,7 @@ function createDatabase(): Database.Database {
 
   runMigrations(db);
   backfillExistingInstallments(db);
+  backfillDedupHashes(db);
 
   return db;
 }

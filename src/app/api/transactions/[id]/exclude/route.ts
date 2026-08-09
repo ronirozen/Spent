@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  addExcludedMerchant,
-  deleteExcludedMerchantByKey,
+  addMerchantRule,
+  deleteMerchantRuleByKey,
   setTransactionExcluded,
-} from "@/server/db/queries/excluded-merchants";
+} from "@/server/db/queries/merchant-rules";
 import { getTransactionContext } from "@/server/db/queries/transactions";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 
@@ -39,9 +39,9 @@ export async function POST(
 
   if (body.alwaysForMerchant === true) {
     if (body.excluded) {
-      addExcludedMerchant(workspaceId, ctx.provider, ctx.description);
+      addMerchantRule(workspaceId, ctx.provider, ctx.description, "exact", "exclude", null);
     } else {
-      deleteExcludedMerchantByKey(workspaceId, ctx.provider, ctx.description);
+      deleteMerchantRuleByKey(workspaceId, ctx.provider, ctx.description);
     }
   }
 

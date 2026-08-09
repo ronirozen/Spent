@@ -90,9 +90,10 @@ ${correctionsBlock}
 Transactions:
 ${transactionLines}
 
-Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string from the list above), and "confidence" (integer 1-7).
+Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string from the list above), "confidence" (integer 1-7), and "normalizedName" (string - a clean, Title Case version of the merchant name).
+Optionally add "merchantDomain" (string - the website domain of the merchant, e.g. "netflix.com", "ramilevy.co.il", "wizzair.com").
 Optionally add "isSubscription": true if this transaction looks like a recurring payment (e.g. Netflix, Spotify, gym membership, rent).
-Example: [{"index": 0, "categoryName": "Groceries", "confidence": 7}, {"index": 1, "categoryName": "Entertainment", "confidence": 5, "isSubscription": true}]
+Example: [{"index": 0, "categoryName": "Groceries", "confidence": 7, "normalizedName": "Rami Levy", "merchantDomain": "ramilevy.co.il"}, {"index": 1, "categoryName": "Entertainment", "confidence": 5, "normalizedName": "Netflix", "merchantDomain": "netflix.com", "isSubscription": true}]
 
 ${CONFIDENCE_BLOCK}
 
@@ -102,7 +103,9 @@ Rules:
 - Every transaction must be categorized; pick the closest matching category.
 - Israeli merchant names (Hebrew or transliterated) are common; categorize based on the business type.
 - Pay attention to the "NOT" clauses in the category descriptions - they disambiguate common confusions.
-- Apply lessons from "Past corrections" - if a new merchant resembles a past correction, prefer the corrected category.`;
+- Apply lessons from "Past corrections" - if a new merchant resembles a past correction, prefer the corrected category.
+- "normalizedName" MUST be a clean, readable name for the merchant (strip branch numbers, gibberish, and abbreviations).
+- "merchantDomain" MUST be the main website domain of the merchant if you know it. This is used to fetch the merchant's logo. If you don't know it, omit the field.`;
   }
 
   // Proposal mode: the AI is encouraged to suggest new categories whenever
@@ -115,12 +118,13 @@ ${correctionsBlock}
 Transactions:
 ${transactionLines}
 
-Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string), and "confidence" (integer 1-7). If you propose a new category, add "isNew": true.
+Return ONLY a valid JSON array. Each element MUST have "index" (number), "categoryName" (string), "confidence" (integer 1-7), and "normalizedName" (string). If you propose a new category, add "isNew": true.
+Optionally add "merchantDomain" (string) if you know the merchant's website domain.
 Optionally add "isSubscription": true if this transaction looks like a recurring payment.
 
-Existing category example: {"index": 0, "categoryName": "Groceries", "confidence": 7}
-New category example:      {"index": 3, "categoryName": "Pet Supplies", "isNew": true, "confidence": 5}
-Subscription example:      {"index": 1, "categoryName": "Entertainment", "confidence": 6, "isSubscription": true}
+Existing category example: {"index": 0, "categoryName": "Groceries", "confidence": 7, "normalizedName": "Rami Levy", "merchantDomain": "ramilevy.co.il"}
+New category example:      {"index": 3, "categoryName": "Pet Supplies", "isNew": true, "confidence": 5, "normalizedName": "Petco", "merchantDomain": "petco.com"}
+Subscription example:      {"index": 1, "categoryName": "Entertainment", "confidence": 6, "isSubscription": true, "normalizedName": "Netflix", "merchantDomain": "netflix.com"}
 
 ${CONFIDENCE_BLOCK}
 
@@ -135,7 +139,9 @@ Rules for every transaction:
 - ${HIERARCHY_RULE}
 - Israeli merchant names (Hebrew or transliterated) are common; categorize based on the business type.
 - Pay attention to the "NOT" clauses in the category descriptions.
-- Apply lessons from "Past corrections" - if a new merchant resembles a past correction, prefer the corrected category.`;
+- Apply lessons from "Past corrections" - if a new merchant resembles a past correction, prefer the corrected category.
+- "normalizedName" MUST be a clean, readable name for the merchant (strip branch numbers, gibberish, and abbreviations).
+- "merchantDomain" MUST be the main website domain of the merchant if you know it. If you don't know it, omit the field.`;
 }
 
 export const SYSTEM_PROMPT =

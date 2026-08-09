@@ -20,7 +20,6 @@ export function computeDedupHash(fields: DedupFields): string {
     String(fields.originalAmount),
     fields.originalCurrency,
     fields.description,
-    fields.identifier != null ? String(fields.identifier) : "",
     fields.installmentNumber != null ? String(fields.installmentNumber) : "",
     fields.installmentTotal != null ? String(fields.installmentTotal) : "",
   ];

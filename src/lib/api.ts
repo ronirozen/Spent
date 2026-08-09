@@ -1,4 +1,5 @@
 import type {
+  MerchantRule,
   SetupStatus,
   AppSettings,
   TransactionWithCategory,
@@ -251,21 +252,14 @@ export function setTransactionExcluded(
   });
 }
 
-export interface ExcludedMerchantRule {
-  id: number;
-  provider: string;
-  merchantKey: string;
-  createdAt: string;
-}
-
-export function listExcludedMerchants() {
-  return fetchJSON<{ rules: ExcludedMerchantRule[] }>(
-    `/api/excluded-merchants`,
+export function listMerchantRules() {
+  return fetchJSON<{ rules: MerchantRule[] }>(
+    `/api/merchant-rules`,
   );
 }
 
-export function deleteExcludedMerchantRule(id: number) {
-  return fetchJSON<{ success: boolean }>(`/api/excluded-merchants/${id}`, {
+export function deleteMerchantRule(id: number) {
+  return fetchJSON<{ success: boolean }>(`/api/merchant-rules/${id}`, {
     method: "DELETE",
   });
 }

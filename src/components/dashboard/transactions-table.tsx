@@ -533,8 +533,23 @@ export function TransactionsTable({
                         {formatDate(txn.date)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="font-medium">{txn.description}</div>
+                        <div className="flex items-center gap-3">
+                          {txn.merchantDomain ? (
+                            <img
+                              src={`https://www.google.com/s2/favicons?domain=${txn.merchantDomain}&sz=128`}
+                              alt={txn.description}
+                              className="h-8 w-8 shrink-0 rounded-full border border-border bg-white object-contain p-0.5"
+                            />
+                          ) : (
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium text-muted-foreground border border-border">
+                              {txn.description.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <div className="truncate font-medium" title={txn.originalDescription !== txn.description ? txn.originalDescription : undefined}>
+                                {txn.description}
+                              </div>
                           {txn.needsReview && (
                             <span
                               className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
@@ -558,12 +573,17 @@ export function TransactionsTable({
                               )}
                             </span>
                           )}
-                        </div>
-                        {txn.memo && (
-                          <div className="text-xs text-muted-foreground">
-                            {txn.memo}
-                          </div>
-                        )}
+                            </div>
+                            {txn.originalDescription && txn.originalDescription !== txn.description && (
+                              <div className="truncate text-xs text-muted-foreground/70" title={txn.originalDescription}>
+                                {txn.originalDescription}
+                              </div>
+                            )}
+                            {txn.memo && (
+                              <div className="truncate text-xs text-muted-foreground">
+                                {txn.memo}
+                              </div>
+                            )}
                         {txn.type === "installments" &&
                           txn.installmentNumber &&
                           txn.installmentTotal && (
@@ -580,6 +600,7 @@ export function TransactionsTable({
                             {txn.accountLabel ? `${txn.accountLabel} (***${txn.accountNumber})` : `***${txn.accountNumber}`}
                           </div>
                         )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">

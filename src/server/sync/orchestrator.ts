@@ -25,7 +25,7 @@ import {
   normalizeMerchant,
   incrementMerchantHits,
 } from "@/server/lib/merchant-memory";
-import { applyMerchantRulesToSyncRun } from "@/server/db/queries/excluded-merchants";
+import { applyMerchantRulesToSyncRun } from "@/server/db/queries/merchant-rules";
 import { getAllCategories } from "@/server/db/queries/categories";
 import { getRecentCorrections } from "@/server/db/queries/category-corrections";
 import { extractInstallments } from "@/server/lib/installments-extractor";
@@ -521,6 +521,8 @@ export async function syncWorkspace(
               id: number;
               categoryId: number;
               aiConfidence: number | null;
+              normalizedName?: string;
+              merchantDomain?: string;
             }[] = [];
             const reviewFlags: { id: number; needsReview: boolean }[] = [];
 
@@ -535,6 +537,8 @@ export async function syncWorkspace(
                 id: txn.id,
                 categoryId: category.id,
                 aiConfidence: confidence,
+                normalizedName: m.normalizedName,
+                merchantDomain: m.merchantDomain,
               });
               reviewFlags.push({
                 id: txn.id,

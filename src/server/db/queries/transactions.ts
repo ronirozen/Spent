@@ -60,12 +60,12 @@ export function insertTransactions(
       workspace_id, account_number, date, processed_date, original_amount, original_currency,
       charged_amount, charged_currency, description, memo, type, status,
       identifier, installment_number, installment_total, provider, credential_id,
-      sync_run_id, dedup_hash, dedup_sequence, kind
+      sync_run_id, dedup_hash, dedup_sequence, kind, original_description
     ) VALUES (
       @workspaceId, @accountNumber, @date, @processedDate, @originalAmount, @originalCurrency,
       @chargedAmount, @chargedCurrency, @description, @memo, @type, @status,
       @identifier, @installmentNumber, @installmentTotal, @provider, @credentialId,
-      @syncRunId, @dedupHash, @dedupSequence, @kind
+      @syncRunId, @dedupHash, @dedupSequence, @kind, @originalDescription
     )
     ON CONFLICT(workspace_id, dedup_hash, dedup_sequence) DO UPDATE SET
       status = CASE WHEN transactions.status = 'pending' THEN excluded.status ELSE transactions.status END,
@@ -132,6 +132,7 @@ export function insertTransactions(
         dedupHash: hash,
         dedupSequence: sequence,
         kind,
+        originalDescription: txn.description,
       };
 
       if (batchCount > existingCount) {
@@ -341,18 +342,19 @@ export function updateTransactionCategory(
 
 export function batchUpdateCategories(
   workspaceId: number,
-  updates: { id: number; categoryId: number; aiConfidence?: number | null; isSubscription?: boolean }[]
+  updates: { id: number; categoryId: number; aiConfidence?: number | null; isSubscription?: boolean; normalizedName?: string; merchantDomain?: string }[]
 ): void {
   const db = getDb();
   const stmt = db.prepare(
     `UPDATE transactions
-     SET category_id = ?, category_source = 'ai', ai_confidence = ?, is_subscription_inferred = ?, updated_at = datetime('now')
+     SET category_id = ?, category_source = 'ai', ai_confidence = ?, is_subscription_inferred = ?,
+         description = COALESCE(?, description), merchant_domain = COALESCE(?, merchant_domain), updated_at = datetime('now')
      WHERE workspace_id = ? AND id = ? AND category_source IS NOT 'user'`
   );
 
   db.transaction(() => {
-    for (const { id, categoryId, aiConfidence, isSubscription } of updates) {
-      stmt.run(categoryId, aiConfidence ?? null, isSubscription ? 1 : 0, workspaceId, id);
+    for (const { id, categoryId, aiConfidence, isSubscription, normalizedName, merchantDomain } of updates) {
+      stmt.run(categoryId, aiConfidence ?? null, isSubscription ? 1 : 0, normalizedName ?? null, merchantDomain ?? null, workspaceId, id);
     }
   })();
 }
@@ -625,6 +627,8 @@ interface TransactionRow {
   charged_amount: number;
   charged_currency: string | null;
   description: string;
+  original_description: string;
+  merchant_domain: string | null;
   memo: string | null;
   type: string;
   status: string;
@@ -662,6 +666,8 @@ function mapTransactionRow(row: unknown): TransactionWithCategory {
     chargedAmount: r.charged_amount,
     chargedCurrency: r.charged_currency,
     description: r.description,
+    originalDescription: r.original_description,
+    merchantDomain: r.merchant_domain,
     memo: r.memo,
     type: r.type as "normal" | "installments",
     status: r.status as "completed" | "pending",
