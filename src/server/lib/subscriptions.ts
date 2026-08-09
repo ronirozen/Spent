@@ -34,6 +34,23 @@ function diffDays(d1: string, d2: string): number {
   return Math.abs((date2.getTime() - date1.getTime()) / (1000 * 3600 * 24));
 }
 
+const IGNORED_GENERIC_BILLERS = [
+  "APPLE.COM/BILL",
+  "GOOGLE *",
+  "PAYPAL *",
+  "BIT",
+  "PAYBOX",
+  "PAYPLUS",
+  "ALIEXPRESS"
+];
+
+function isGenericBiller(name: string): boolean {
+  const normalized = normalizeMerchantName(name);
+  return IGNORED_GENERIC_BILLERS.some(biller => 
+    normalized === biller || normalized.startsWith(biller)
+  );
+}
+
 export async function detectSubscriptions(workspaceId: number): Promise<void> {
   const db = getDb();
 
@@ -68,6 +85,7 @@ export async function detectSubscriptions(workspaceId: number): Promise<void> {
   // 3. Analyze each group
   for (const [merchantName, txns] of groups.entries()) {
     if (txns.length < 2) continue;
+    if (isGenericBiller(merchantName)) continue;
     
     // Sort chronologically just to be sure
     txns.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
