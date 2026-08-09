@@ -50,6 +50,7 @@ export function insertTransactions(
   let updated = 0;
 
   const hashCounts = new Map<string, number>();
+  const scrapedHashes = new Set<string>();
 
   const existingCountStmt = db.prepare(
     "SELECT COUNT(*) as count FROM transactions WHERE workspace_id = ? AND dedup_hash = ?"
@@ -108,6 +109,8 @@ export function insertTransactions(
       };
 
       const sequence = batchCount - 1;
+      scrapedHashes.add(`${hash}_${sequence}`);
+      
       const kind = detectKind(txn.description, provider, txn.chargedAmount);
 
       const params = {
@@ -148,6 +151,26 @@ export function insertTransactions(
   });
 
   batchInsert();
+  
+  // CLEANUP ORPHANED PENDING TRANSACTIONS
+  // Any pending transaction in the DB that was not in this scrape run is an orphan (it cleared with a new hash, or was cancelled)
+  const pendingTxns = db.prepare(`
+    SELECT id, dedup_hash, dedup_sequence 
+    FROM transactions 
+    WHERE workspace_id = ? AND credential_id = ? AND status = 'pending'
+  `).all(workspaceId, credentialId) as { id: number; dedup_hash: string; dedup_sequence: number }[];
+
+  const orphans = pendingTxns.filter(t => !scrapedHashes.has(`${t.dedup_hash}_${t.dedup_sequence}`));
+
+  if (orphans.length > 0) {
+    const deleteStmt = db.prepare("DELETE FROM transactions WHERE id = ?");
+    db.transaction(() => {
+      for (const orphan of orphans) {
+        deleteStmt.run(orphan.id);
+      }
+    })();
+  }
+
   return { added, updated };
 }
 
