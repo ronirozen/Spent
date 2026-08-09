@@ -10,11 +10,15 @@ async function run() {
     });
 
     const query = `
-      SELECT id, date, description, account_number, original_amount, original_currency, status
+      SELECT id, date, original_description, description, merchant_domain 
       FROM transactions 
-      WHERE description LIKE '%WIZZ%' OR description LIKE '%אורבניקה%';
+      WHERE original_description IS NOT NULL 
+        AND original_description != description 
+      ORDER BY date DESC 
+      LIMIT 10;
     `;
     const res = await ssh.execCommand(`docker exec spent sqlite3 data/spent.db "${query}"`);
+    console.log("SMART MERCHANT DATA IN REMOTE DB:");
     console.log(res.stdout);
     if (res.stderr) console.error("STDERR:", res.stderr);
     

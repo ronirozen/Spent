@@ -19,6 +19,8 @@ import { NeedsAttentionCard } from "./needs-attention-card";
 import { BankHealthCard } from "./bank-health-card";
 import { SyncStatusPill } from "./sync-status-pill";
 import { SyncFailureBanner } from "./sync-failure-banner";
+import { LiquidStatusCard } from "./liquid-status-card";
+import { FixedTransactionsCard } from "./fixed-transactions-card";
 import { CardError, CardSkeleton } from "./card-shell";
 import type { HomePayload, HomeSection } from "@/lib/types";
 
@@ -43,6 +45,8 @@ export function HomePage() {
       topMerchants: t("topMerchants"),
       needsAttention: t("needsAttention"),
       bankHealth: t("bankConnections"),
+      liquidStatus: t("liquidStatus") || "מצב נזיל",
+      fixedTransactions: t("fixedTransactions") || "תנועות קבועות",
     }),
     [t]
   );
@@ -115,12 +119,16 @@ export function HomePage() {
         />
         <AINotConnectedBanner className="mb-4 md:mb-5 lg:mb-6" />
         <div className="grid grid-cols-12 gap-4 md:gap-5 lg:gap-6">
+          <div className="col-span-12">
+            {renderSection("liquidStatus", data, isLoading, isError, "w-full", skeletonLabels)}
+          </div>
           {renderSection("thisMonth", data, isLoading, isError, ROW_1, skeletonLabels)}
           {renderSection("cashFlow", data, isLoading, isError, ROW_1_SIDE, skeletonLabels)}
           {renderSection("categorySnapshot", data, isLoading, isError, ROW_2, skeletonLabels)}
           {renderSection("historicalTrend", data, isLoading, isError, ROW_2_SIDE, skeletonLabels)}
           {renderSection("recentTransactions", data, isLoading, isError, ROW_2, skeletonLabels)}
           {renderSection("topMerchants", data, isLoading, isError, ROW_2_SIDE, skeletonLabels)}
+          {renderSection("fixedTransactions", data, isLoading, isError, ROW_2_SIDE, skeletonLabels)}
           {renderSection("needsAttention", data, isLoading, isError, ROW_2, skeletonLabels)}
           {renderSection("bankHealth", data, isLoading, isError, ROW_2_SIDE, skeletonLabels)}
         </div>
@@ -193,6 +201,14 @@ function renderCard(section: HomeSection, data: HomePayload) {
       return data.bankHealth ? (
         <BankHealthCard items={data.bankHealth} />
       ) : null;
+    case "liquidStatus":
+      return data.liquidStatus ? (
+        <LiquidStatusCard data={data.liquidStatus} />
+      ) : null;
+    case "fixedTransactions":
+      return data.fixedTransactions ? (
+        <FixedTransactionsCard items={data.fixedTransactions} />
+      ) : null;
   }
 }
 
@@ -205,4 +221,6 @@ const SKELETON_HEIGHTS: Record<HomeSection, number> = {
   topMerchants: 220,
   needsAttention: 160,
   bankHealth: 160,
+  liquidStatus: 160,
+  fixedTransactions: 280,
 };

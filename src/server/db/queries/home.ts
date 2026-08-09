@@ -5,8 +5,9 @@ import { toLocalISODate } from "../../lib/date-utils";
 import type {
   HomeBankHealthItem,
   HomeCashFlow,
-  HomeCategorySnapshotItem,
+  HomeFixedTransaction,
   HomeHistoricalTrendPoint,
+  HomeLiquidStatus,
   HomeNeedsAttention,
   HomeRecentTransaction,
 } from "@/lib/types";
@@ -138,6 +139,40 @@ export function getNeedsAttentionCounts(
     uncategorized: uncategorized.count,
     lowConfidence: lowConfidence.count,
     flagged: flagged.count,
+  };
+}
+
+export function getFixedTransactions(workspaceId: number): HomeFixedTransaction[] {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT id, name, amount, frequency, type, status 
+    FROM subscriptions 
+    WHERE workspace_id = ? AND status = 'active'
+    ORDER BY amount DESC
+  `).all(workspaceId) as HomeFixedTransaction[];
+  return rows;
+}
+
+export function getLiquidStatus(workspaceId: number): HomeLiquidStatus {
+  const db = getDb();
+  // We approximate Liquid Status as the sum of all current pending and completed credit card expenses in the current billing cycle.
+  // For simplicity since we don't have exact billing cycles, we'll sum all expenses on credit cards (Isracard, Max, Cal, Amex) for the current month.
+  const now = new Date();
+  const from = toLocalISODate(new Date(now.getFullYear(), now.getMonth(), 1));
+  const to = toLocalISODate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+
+  const row = db.prepare(`
+    SELECT COALESCE(SUM(t.charged_amount), 0) as total
+    FROM transactions t
+    WHERE t.workspace_id = ? 
+      AND t.date >= ? AND t.date <= ?
+      AND t.kind = 'expense' 
+      AND t.is_excluded = 0
+      AND t.provider IN ('isracard', 'cal', 'max', 'amex')
+  `).get(workspaceId, from, to) as { total: number };
+
+  return {
+    totalCreditCardDebt: row.total,
   };
 }
 

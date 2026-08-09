@@ -164,7 +164,9 @@ export type HomeSection =
   | "recentTransactions"
   | "topMerchants"
   | "needsAttention"
-  | "bankHealth";
+  | "bankHealth"
+  | "liquidStatus"
+  | "fixedTransactions";
 
 export interface HomeThisMonth {
   spent: number;
@@ -236,6 +238,19 @@ export interface HomeSectionError {
   message: string;
 }
 
+export interface HomeLiquidStatus {
+  totalCreditCardDebt: number;
+}
+
+export interface HomeFixedTransaction {
+  id: number;
+  name: string;
+  amount: number;
+  frequency: "monthly" | "yearly" | "weekly";
+  type: "income" | "expense";
+  status: "active" | "cancelled";
+}
+
 export interface HomePayload {
   thisMonth: HomeThisMonth | null;
   cashFlow: HomeCashFlow | null;
@@ -245,6 +260,8 @@ export interface HomePayload {
   topMerchants: HomeTopMerchant[] | null;
   needsAttention: HomeNeedsAttention | null;
   bankHealth: HomeBankHealthItem[] | null;
+  liquidStatus: HomeLiquidStatus | null;
+  fixedTransactions: HomeFixedTransaction[] | null;
   nextScheduledSync: string | null;
   errors: HomeSectionError[];
 }
