@@ -157,7 +157,7 @@ export function MerchantRulesCard() {
 
             <div className="space-y-2">
               <Label>Provider restriction</Label>
-              <Select value={provider} onValueChange={setProvider}>
+              <Select value={provider} onValueChange={(v) => setProvider(v || "all")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

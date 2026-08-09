@@ -600,6 +600,7 @@ export function TransactionsTable({
                             {txn.accountLabel ? `${txn.accountLabel} (***${txn.accountNumber})` : `***${txn.accountNumber}`}
                           </div>
                         )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
