@@ -16,9 +16,9 @@ export function FixedTransactionsCard({ items }: Props) {
   
   if (items.length === 0) {
     return (
-      <CardShell label={t("fixedTransactions") || "תנועות קבועות"}>
+      <CardShell label={t("fixedTransactions")}>
         <div className="flex flex-1 items-center justify-center py-6 text-sm text-muted-foreground">
-          {t("noFixedTransactionsYet") || "אין תנועות קבועות לחודש זה"}
+          {t("noFixedTransactionsYet")}
         </div>
       </CardShell>
     );
@@ -31,20 +31,21 @@ export function FixedTransactionsCard({ items }: Props) {
 
   return (
     <CardShell
-      label={t("fixedTransactions") || "תנועות קבועות"}
-      action={<CardAction href="/subscriptions">{t("manageSubscriptions") || "נהל"}</CardAction>}
+      label={t("fixedTransactions")}
+      action={<CardAction href="/subscriptions">{t("manageSubscriptions")}</CardAction>}
     >
       <div className="mb-4">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-medium">
-          {t("totalFixedExpenses") || "סה״כ הוצאות קבועות"}
+          {t("totalFixedExpenses")}
         </div>
         <div dir="ltr" className="text-xl tabular-nums font-medium text-[var(--status-over)]">
           −{formatCurrency(totalAmount)}
         </div>
       </div>
       
-      <ul className="-mx-2 divide-y divide-border/60">
-        {items.map((txn) => (
+      <div className="-mx-2 max-h-[320px] overflow-y-auto">
+        <ul className="divide-y divide-border/60">
+          {items.map((txn) => (
           <li key={txn.id}>
             <Link
               href="/subscriptions"
@@ -58,9 +59,9 @@ export function FixedTransactionsCard({ items }: Props) {
                   {txn.name}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {txn.frequency === 'monthly' ? (t("frequencyMonthly") || 'חודשי') : 
-                   txn.frequency === 'yearly' ? (t("frequencyYearly") || 'שנתי') : 
-                   (t("frequencyWeekly") || 'שבועי')}
+                  {txn.frequency === 'monthly' ? t("frequencyMonthly") : 
+                   txn.frequency === 'yearly' ? t("frequencyYearly") : 
+                   t("frequencyWeekly")}
                 </div>
               </div>
               <span
@@ -77,7 +78,8 @@ export function FixedTransactionsCard({ items }: Props) {
             </Link>
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
     </CardShell>
   );
 }

@@ -45,8 +45,8 @@ export function HomePage() {
       topMerchants: t("topMerchants"),
       needsAttention: t("needsAttention"),
       bankHealth: t("bankConnections"),
-      liquidStatus: t("liquidStatus") || "מצב נזיל",
-      fixedTransactions: t("fixedTransactions") || "תנועות קבועות",
+      liquidStatus: t("liquidStatus"),
+      fixedTransactions: t("fixedTransactions"),
     }),
     [t]
   );

@@ -88,7 +88,17 @@
     "lastAttemptFailed": "Last attempt failed",
     "filterAll": "All",
     "filterSubscriptions": "Subscriptions",
-    "filterRegular": "Regular"
+    "filterRegular": "Regular",
+    "liquidStatus": "Liquid Status",
+    "liquidFunds": "Liquid Funds",
+    "creditDebt": "Credit Debt",
+    "fixedTransactions": "Fixed Transactions",
+    "noFixedTransactionsYet": "No fixed transactions yet",
+    "manageSubscriptions": "Manage Subscriptions →",
+    "totalFixedExpenses": "Total Fixed Expenses",
+    "frequencyMonthly": "Monthly",
+    "frequencyYearly": "Yearly",
+    "frequencyWeekly": "Weekly"
   },
   "syncPill": {
     "noBanksConnected": "No banks connected",

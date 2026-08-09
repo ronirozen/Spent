@@ -21,7 +21,7 @@ export function LiquidStatusCard({ data }: Props) {
   const isNegative = balance < 0;
 
   return (
-    <CardShell label={t("liquidStatus") || "מצב נזיל"}>
+    <CardShell label={t("liquidStatus")}>
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-4 md:py-6">
         <div className="flex items-center justify-center gap-3 w-full">
           <Wallet className={cn("h-7 w-7 opacity-80", isNegative ? "text-[var(--status-over)]" : "text-[var(--status-on-track)]")} />
@@ -47,11 +47,11 @@ export function LiquidStatusCard({ data }: Props) {
           <div className="flex justify-between items-center mt-3 text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-semibold">
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-[var(--status-on-track)]" />
-              {t("liquidFunds") || "כסף זמין"} 0 ₪
+              {t("liquidFunds")} 0 ₪
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-[var(--status-over)]" />
-              {t("creditDebt") || "אשראי ומינוס"} {formatCurrency(totalCreditCardDebt)}
+              {t("creditDebt")} {formatCurrency(totalCreditCardDebt)}
             </div>
           </div>
         </div>
