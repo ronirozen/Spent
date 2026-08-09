@@ -10,6 +10,8 @@ import {
   getHistoricalTrend,
   getNeedsAttentionCounts,
   getRecentTransactionsForHome,
+  getLiquidStatus,
+  getFixedTransactions,
 } from "@/server/db/queries/home";
 import { getWorkspaceSetting } from "@/server/db/queries/settings";
 import { getNextRunAt } from "@/server/sync/scheduler";
@@ -30,6 +32,8 @@ import type {
   HomeNeedsAttention,
   HomePayload,
   HomeRecentTransaction,
+  HomeLiquidStatus,
+  HomeFixedTransaction,
   HomeSection,
   HomeSectionError,
   HomeThisMonth,
@@ -159,6 +163,14 @@ export async function GET(request: Request) {
     getBankHealth(workspaceId)
   );
 
+  const liquidStatus = safe<HomeLiquidStatus>("liquidStatus", errors, () =>
+    getLiquidStatus(workspaceId)
+  );
+
+  const fixedTransactions = safe<HomeFixedTransaction[]>("fixedTransactions", errors, () =>
+    getFixedTransactions(workspaceId)
+  );
+
   const payload: HomePayload = {
     thisMonth,
     cashFlow,
@@ -168,6 +180,8 @@ export async function GET(request: Request) {
     topMerchants,
     needsAttention,
     bankHealth,
+    liquidStatus,
+    fixedTransactions,
     nextScheduledSync: getNextRunAt(),
     errors,
   };
