@@ -171,6 +171,26 @@ export function insertTransactions(
     })();
   }
 
+  // CLEANUP FUZZY DUPLICATE PENDING TRANSACTIONS
+  // Israeli banks often report a transaction as both pending and completed during the settlement window.
+  // We delete any pending transaction if there is a completed transaction with the exact same 
+  // account, amount, and currency, within +/- 5 days.
+  const cleanupDuplicatesStmt = db.prepare(`
+    DELETE FROM transactions
+    WHERE workspace_id = ? AND credential_id = ? AND status = 'pending'
+      AND EXISTS (
+        SELECT 1 FROM transactions t2
+        WHERE t2.workspace_id = transactions.workspace_id
+          AND t2.account_number = transactions.account_number
+          AND t2.original_amount = transactions.original_amount
+          AND t2.original_currency = transactions.original_currency
+          AND t2.status = 'completed'
+          AND abs(julianday(t2.date) - julianday(transactions.date)) <= 5
+          AND t2.id != transactions.id
+      )
+  `);
+  cleanupDuplicatesStmt.run(workspaceId, credentialId);
+
   return { added, updated };
 }
 
